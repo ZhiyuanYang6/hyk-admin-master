@@ -1,0 +1,181 @@
+@import './variables.scss';
+@import './mixin.scss';
+@import './transition.scss';
+@import './element-ui.scss';
+@import './sidebar.scss';
+
+body {
+  margin: 0;
+  height: 100%;
+  padding: 0;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+div:focus {
+  outline: none;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+.clearfix {
+  &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+  }
+}
+
+//main-container全局样式
+.app-main {
+  min-height: 100%
+}
+
+.app-container {
+  padding: 20px;
+}
+
+.el-pagination {
+  padding: 30px 0;
+}
+
+//组件淡入淡出
+.fade-enter {
+  opacity: 0.2;
+}
+
+.fade-leave {
+  opacity: 1;
+}
+
+.fade-enter-active {
+  transition: opacity .4s;
+}
+
+.fade-leave-active {
+  opacity: 0;
+  transition: opacity .4s;
+}
+
+.el-header,
+.el-footer {
+  background-color: #545C64;
+  color: #fff;
+  line-height: 66px;
+  height: 66px;
+  font-size: 14px;
+  box-shadow: 2px 0 3px rgba(0, 0, 0, .5);
+  z-index: 1000;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+  overflow: hidden;
+  .app-header {
+    .title {
+      font-size: 24px;
+    }
+  }
+  .app-content {
+    flex: 1;
+    display: flex;
+    flex-flow: row;
+    .app-nav {
+      flex: 0 0 250px;
+      background: #324157;
+    }
+    .app-wrap {
+      flex: 1;
+      padding: 10px 20px;
+      overflow: auto;
+      .content-wrap {
+        border: 1px solid #d1dbe5;
+        border-top: none;
+        padding: 0 20px;
+      }
+    }
+  }
+}
+
+
+//组件自定义
+div .el-badge__content {
+  border: 0;
+}
+
+div.el-table--border::after,
+div.el-table--group::after,
+div.el-table::before,
+span.el-checkbox__inner {
+  z-index: 0;
+}
+
+.el-dialog--center div.el-dialog__header {
+  background: #fff;
+}
+
+div.el-dialog__header {
+  background: #f2f2f2;
+}
+
+.el-dialog--center div.el-dialog__body {
+  padding: 0 20px;
+}
+
+div.el-dialog__body {
+  padding: 0 20px;
+  background: #fff;
+}
+
+.jbsztarea .el-textarea__inner {
+  height: 200px;
+  width: 400px;
+}
+
+.mbgl .el-tabs__content {
+  height: 600px;
+}
+
+#app .nest-menu .el-submenu>.el-submenu__title,
+#app .el-submenu li.el-menu-item {
+  min-width: 180px !important;
+  background-color: #2F3337 !important;
+}
+
+#app .nest-menu .el-submenu>.el-submenu__title:hover,
+#app .el-submenu li.el-menu-item:hover {
+  background-color: #202427 !important;
+}
