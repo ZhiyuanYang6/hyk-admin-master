@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import app from './modules/app'
 import user from './modules/user'
 import tagsView from './modules/tagsView'
+import date from './modules/date'
 import permission from './modules/permission'
 // import getters from './getters'
 
@@ -13,7 +14,8 @@ const store = new Vuex.Store({
     app,
     user,
     tagsView,
-    permission
+    permission,
+    date
   },
   // getters
   getters: {

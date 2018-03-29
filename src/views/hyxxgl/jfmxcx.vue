@@ -18,7 +18,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-date-picker v-model="formInline.sj" type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+        <el-date-picker v-model="formInline.sj" type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
         </el-date-picker>
       </el-form-item>
       <!-- 右侧按钮 -->
@@ -27,18 +27,24 @@
         <el-button type="success" @click="onloadtable1()">导出Excel</el-button>
       </el-form-item>
     </el-form>
+    <!-- 控制表格显示列 -->
+    <div class="filter-container">
+      <el-checkbox-group v-model="formTheadOptions">
+        <el-checkbox label="会员名称">会员名称</el-checkbox>
+        <el-checkbox label="手机号">手机号</el-checkbox>
+        <el-checkbox label="增加积分">增加积分</el-checkbox>
+        <el-checkbox label="消费积分">消费积分</el-checkbox>
+        <el-checkbox label="积分方式">积分方式</el-checkbox>
+        <el-checkbox label="订单号">订单号</el-checkbox>
+        <el-checkbox label="时间">时间</el-checkbox>
+      </el-checkbox-group>
+    </div>
     <!-- 表格 -->
     <div class="stable">
       <!-- @sort-change="sortChange" -->
-      <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border>
-        <el-table-column prop="hybh" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
-        <el-table-column prop="hymc" label="会员名称" align="center"> </el-table-column>
-        <el-table-column prop="sjh" label="手机号" align="center"> </el-table-column>
-        <el-table-column prop="zjjf" label="增加积分" align="center"> </el-table-column>
-        <el-table-column prop="xfjf" label="消费积分" align="center"> </el-table-column>
-        <el-table-column prop="jffs" label="积分方式" align="center"> </el-table-column>
-        <el-table-column prop="ddh" label="订单号" align="center"> </el-table-column>
-        <el-table-column prop="sj" label="时间" align="center"> </el-table-column>
+      <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" border>
+        <el-table-column prop="memberId" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
+        <el-table-column :key="tablist.value" :prop="tablist.value" :label="tablist.title" :width="tablist.width" align="center" v-for="tablist in dtablelist"></el-table-column>
       </el-table>
     </div>
     <!-- 分页 -->
@@ -58,11 +64,11 @@ export default {
         hybh: '',
         sjh: '',
         ddh: '',
-        jffs: '',
+        jffs: '0',
         sj: '',
       },
       optjffs: [
-        { value: '0', label: '全部积分' },
+        { value: '0', label: '积分' },
         { value: '1', label: '增加积分' },
         { value: '2', label: '消费积分' }
       ],
@@ -72,21 +78,16 @@ export default {
         pageNum: 1, //查询的页码
         totalCount: 100,
       },
-      tableData: [{
-        hybh: "001",
-        hymc: "张三",
-        sjh: "15945687512",
-        zjjf: "0",
-        xfjf: "1000",
-        ddh: '2018999999',
-        sj: '2008-09-10 22:23:15',
-      }],
+      tableData: [],
       orderBy: '',
       loading: false,
+      formTheadOptions: ['会员名称', '手机号', '增加积分', '消费积分', '积分方式', "订单号", "时间", ],
+      dtablelist: [{ "title": "会员名称", value: 'name' }, { "title": "手机号", value: 'phone' }, { "title": "增加积分", value: 'zjjf' }, { "title": "消费积分", value: 'jsjf' }, { "title": "积分方式", value: 'jffs' }, { "title": "订单号", value: 'ddh' }, { "title": "时间", "width": 200, value: 'createTime' }],
+      checkboxVal: [{ "title": "会员名称", value: 'name' }, { "title": "手机号", value: 'phone' }, { "title": "增加积分", value: 'zjjf' }, { "title": "消费积分", value: 'jsjf' }, { "title": "积分方式", value: 'jffs' }, { "title": "订单号", value: 'ddh' }, { "title": "时间", "width": 200, value: 'createTime' }],
     }
-
   },
   created: function() {
+    this.getNewDate();
     this.onloadtable1();
   },
   methods: {
@@ -106,7 +107,15 @@ export default {
       }
       this.onloadtable1();
     },
-    timeFormat() {
+    getNewDate() { //当天时间
+      var nnewDate = new Date();
+      var y = nnewDate.getFullYear();
+      var m = nnewDate.getMonth();
+      var d = nnewDate.getDate();
+      var snewDate = new Date(y, m, d);
+      this.formInline.sj = [snewDate, nnewDate];
+    },
+    timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
         var sy = this.formInline.sj[0].getFullYear();
         var sm = this.formInline.sj[0].getMonth();
@@ -123,6 +132,7 @@ export default {
         this.formInline.startTime = sy + "-" + (sm + 1 < 10 ? '0' + (sm + 1) : sm + 1) + "-" + (sd < 10 ? '0' + sd : sd) + " " + (sh < 10 ? '0' + sh : sh) + ":" + (si < 10 ? '0' + si : si) + ":" + (ss < 10 ? '0' + ss : ss);
         this.formInline.endTime = ey + "-" + (em + 1 < 10 ? '0' + (em + 1) : em + 1) + "-" + (ed < 10 ? '0' + ed : ed) + " " + (eh < 10 ? '0' + eh : eh) + ":" + (ei < 10 ? '0' + ei : ei) + ":" + (es < 10 ? '0' + es : es);
       } else {
+        this.getNewDate();
         this.formInline.startTime = "";
         this.formInline.endTime = "";
       }
@@ -135,39 +145,54 @@ export default {
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
         hybh: this.formInline.hybh,
-        sjh: this.formInline.sjh,
+        phone: this.formInline.sjh,
         ddh: this.formInline.ddh,
         jffs: this.formInline.jffs,
         startTime: this.formInline.startTime,
         endTime: this.formInline.endTime
       }
       console.log(jfmxcxData);
-      axios.post('http://192.168.1.127:8082/card/pointsDetail/test.do', jfmxcxData)
+      this.loading = true;
+      axios.post('http://192.168.1.127:8082/card/pointsDetail/pointsDetailQueryPageList.do', jfmxcxData)
         .then(response => {
           this.loading = false;
-          // var response = { data: { data: this.tableData } };
-          // this.analysis(response.data.data);
-          this.listQuery.totalCount = response.data.totalCount;
-          this.tableData = response.data.data;
-          console.log(response);
+          this.analysis(response.data.list);
+          this.listQuery.totalCount = response.data.total;
+          this.tableData = response.data.list;
+          console.log(response.data);
         })
         .catch(error => {
-          console.log(error)
+          this.loading = false;
           Message.error("error：" + "请检查网络是否连接");
         })
+
     },
-    analysis(jfmxcxData) {
+    selecx() {
+      this.onloadtable1();
+    },
+    analysis(jfmxcxData) { //判断积分方式
       for (var i = 0; i < jfmxcxData.length; i++) {
-        if (jfmxcxData.zjjf == "0" || jfmxcxData.zjjf == "" || jfmxcxData.zjjf == null || jfmxcxData.zjjf == undefined) {
+        if (jfmxcxData[i].zjjf == "0" || jfmxcxData[i].zjjf == "" || jfmxcxData[i].zjjf == null || jfmxcxData[i].zjjf == undefined) {
           jfmxcxData[i].jffs = "消费积分";
-          // jfmxcxData[i].jffs = "购买消费";
         } else {
           jfmxcxData[i].jffs = "增加积分";
         }
       }
-      // console.log(jfmxcxData);
     },
-
+  },
+  watch: {
+    formTheadOptions(valArr) { //动态增删表格列
+      var hastablelist = [];
+      for (var i = 0; i < this.checkboxVal.length; i++) {
+        for (var n = 0; n < this.formTheadOptions.length; n++) {
+          if (this.checkboxVal[i].title == this.formTheadOptions[n]) {
+            hastablelist.push(this.checkboxVal[i]);
+          }
+        }
+      }
+      this.dtablelist = hastablelist;
+      // console.log(hastablelist);
+    }
   }
 }
 

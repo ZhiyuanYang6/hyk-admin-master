@@ -15,10 +15,8 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="formInline.xfsj" filterable placeholder="请选择消费时间" style="width:150px;">
-          <el-option v-for="item in optxfsj" :key="item.value" :label="item.label" :value="item.value">
-          </el-option>
-        </el-select>
+        <el-date-picker v-model="formInline.sj" type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        </el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-select v-model="formInline.xfqd" filterable placeholder="请选择消费渠道" style="width:150px;">
@@ -75,19 +73,17 @@ export default {
         hybh: '',
         sjh: '',
         xffs: '',
-        xfsj: '',
+        sj: '',
         xfqd: '',
       },
       optxffs: [
+        { value: '0', label: '消费方式' },
         { value: '1', label: '微信' },
         { value: '2', label: '支付宝' },
         { value: '3', label: '银行卡' }
       ],
-      optxfsj: [
-        { value: '1', label: '消费时间' }
-      ],
       optxfqd: [
-        { value: '1', label: '消费渠道' }
+        { value: '', label: '消费渠道1' }, { value: '1', label: '消费渠道2' }
       ],
       listQuery: {
         pageSize: 10, //默认每页的数据量
@@ -95,65 +91,83 @@ export default {
         pageNum: 1, //查询的页码
         totalCount: 100,
       },
-      tableData: [{
-        hybh: "001",
-        hymc: "张三",
-        sjh: "15945687512",
-        xfje: "50000",
-        xffs: "微信",
-        xfqd: "酒店",
-        ddh: 'c232323',
-        yhje: '红包(10元)',
-        xfsj: '2008-09-10 22:23:15'
-      }],
-      orderBy: [],
+      tableData: [],
+      orderBy: '',
       loading: false,
       dialogdelVisible: false
     }
 
   },
   created: function() {
-    // this.onloadtable1();
+    this.$store.dispatch('getNewDate', this.formInline);
+    this.onloadtable1();
   },
   methods: {
     handleSizeChange(val) {
       this.listQuery.pageSize = val; //修改每页数据量
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     handleCurrentChange(val) { //跳转第几页
       this.listQuery.pageNum = val;
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     sortChange(column) { //服务器端排序
       if (column.order == "ascending") {
-        this.orderBy1 = column.prop + " asc";
+        this.orderBy = column.prop + " asc";
       } else if (column.order == "descending") {
-        this.orderBy1 = column.prop + " desc";
+        this.orderBy = column.prop + " desc";
       }
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     onloadtable1() { //消费明细查询
-      var queryShjData = {
-        orderBy: this.orderBy1,
+      this.timeFormat();
+      var xfmxcxData = {
+        orderBy: this.orderBy,
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
-        xl: this.formInline.xl,
-        jqbh: this.formInline.jqbh,
-        shbh: this.formInline.shbh,
-        lx: this.formInline.lx
+        hybh: this.formInline.hybh,
+        sjh: this.formInline.sjh,
+        xffs: this.formInline.xffs,
+        startTime: this.formInline.startTime,
+        endTime: this.formInline.endTime,
+        xfqd: this.formInline.xfqd,
       }
-      console.log(queryShjData);
-      axios.post('http://192.168.1.112:8092/Shjgl/queryShj', queryShjData)
+      console.log(xfmxcxData);
+      // debugger;
+      axios.post('http://192.168.1.127:8082/card/consumeDetail/consumeDetailQueryPageList.do', xfmxcxData)
         .then(response => {
           this.loading = false;
-          this.tableData = response.data.data;
+          this.tableData = response.data.list;
+          this.listQuery.totalCount = response.data.total;
           console.log(response.data);
         })
         .catch(error => {
-          // Message.error("error：" + "请检查网络是否连接");
+          Message.error("error：" + "请检查网络是否连接");
         })
     },
- dialogtable(index, row) { this.dialogdelVisible = true; }
+    timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
+      if (this.formInline.sj) {
+        this.$store.dispatch('timeFormat', this.formInline);
+      } else {
+        this.$store.dispatch('getNewDate', this.formInline);
+        this.formInline.startTime = "";
+        this.formInline.endTime = "";
+      }
+      // }
+    },
+    moneyData(money) { //不能用过滤器，很难受 金额
+      return (money / 100).toFixed(2)
+    },
+    jsztData(txzt) { //不能用过滤器，很难受  结算状态
+      if (txzt == 1) {
+        return "处理中";
+      } else if (txzt == 2) {
+        return "已到账";
+      } else {
+        return "未到帐";
+      }
+    },
+    dialogtable(index, row) { this.dialogdelVisible = true; },
 
   }
 }

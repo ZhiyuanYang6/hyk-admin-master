@@ -18,10 +18,8 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="formInline.czsj" filterable placeholder="请选择时间类型" style="width:150px;">
-          <el-option v-for="item in optczsj" :key="item.value" :label="item.label" :value="item.value">
-          </el-option>
-        </el-select>
+        <el-date-picker v-model="formInline.sj" type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        </el-date-picker>
       </el-form-item>
       <!-- 右侧按钮 -->
       <el-form-item>
@@ -33,13 +31,13 @@
     <div class="stable">
       <!-- @sort-change="sortChange" -->
       <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border>
-        <el-table-column prop="hybh" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
-        <el-table-column prop="hymc" label="会员名称" align="center"> </el-table-column>
-        <el-table-column prop="sjh" label="手机号" align="center"> </el-table-column>
-        <el-table-column prop="czje" label="充值金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="czfs" label="充值方式" align="center"> </el-table-column>
+        <el-table-column prop="memberId" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
+        <el-table-column prop="name" label="会员名称" align="center"> </el-table-column>
+        <el-table-column prop="phone" label="手机号" align="center"> </el-table-column>
+        <el-table-column prop="je" label="充值金额(元)" align="center"> </el-table-column>
+        <el-table-column prop="payType" label="充值方式" align="center"> </el-table-column>
         <el-table-column prop="ddh" label="订单号" align="center"> </el-table-column>
-        <el-table-column prop="czsj" label="充值时间" align="center"> </el-table-column>
+        <el-table-column prop="createTime" label="充值时间" align="center"> </el-table-column>
       </el-table>
     </div>
     <!-- 分页 -->
@@ -56,19 +54,17 @@ export default {
   data() {
     return {
       formInline: {
-        xm: '',
+        hybh: '',
         sjh: '',
         ddh: '',
         czfs: '',
-        czsj: '',
+        sj: '',
       },
       optczfs: [
+        { value: '', label: '充值方式' },
         { value: '1', label: '微信' },
         { value: '2', label: '支付宝' },
         { value: '3', label: '银行卡' }
-      ],
-      optczsj: [
-        { value: '1', label: '充值时间' }
       ],
       listQuery: {
         pageSize: 10, //默认每页的数据量
@@ -76,60 +72,83 @@ export default {
         pageNum: 1, //查询的页码
         totalCount: 100,
       },
-      tableData: [{
-        hybh: "001",
-        hymc: "张三",
-        sjh: "15945687512",
-        czje: "50000",
-        czfs: "微信",
-        ddh: 'c232323',
-        czsj: '2008-09-10 22:23:15'
-      }],
-      orderBy: [],
+      tableData: [],
+      orderBy: '',
       loading: false,
     }
 
   },
   created: function() {
-    // this.onloadtable1();
+    this.$store.dispatch('getNewDate', this.formInline);
+    this.onloadtable1();
   },
   methods: {
     handleSizeChange(val) {
       this.listQuery.pageSize = val; //修改每页数据量
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     handleCurrentChange(val) { //跳转第几页
       this.listQuery.pageNum = val;
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     sortChange(column) { //服务器端排序
       if (column.order == "ascending") {
-        this.orderBy1 = column.prop + " asc";
+        this.orderBy = column.prop + " asc";
       } else if (column.order == "descending") {
-        this.orderBy1 = column.prop + " desc";
+        this.orderBy = column.prop + " desc";
       }
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     onloadtable1() { //售货机查询
-      var queryShjData = {
-        orderBy: this.orderBy1,
+      this.timeFormat();
+      var czmxcxData = {
+        orderBy: this.orderBy,
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
-        xl: this.formInline.xl,
-        jqbh: this.formInline.jqbh,
-        shbh: this.formInline.shbh,
-        lx: this.formInline.lx
+        hybh: this.formInline.hybh,
+        sjh: this.formInline.sjh,
+        ddh: this.formInline.ddh,
+        czfs: this.formInline.czfs,
+        startTime: this.formInline.startTime,
+        endTime: this.formInline.endTime,
       }
-      console.log(queryShjData);
-      axios.post('http://192.168.1.112:8092/Shjgl/queryShj', queryShjData)
+      console.log(czmxcxData);
+      axios.post('http://192.168.1.127:8082/card/rechargeDetail/rechargeDetailQueryPageList.do', czmxcxData)
         .then(response => {
           this.loading = false;
-          this.tableData = response.data.data;
+          this.tableData = response.data.list;
+          for (var i = 0; i < response.data.list.length; i++) {
+            response.data.list[i].je = this.moneyData(response.data.list[i].je);
+            response.data.list[i].payType = this.jsztData(response.data.list[i].payType);
+          }
+          this.listQuery.totalCount = response.data.total;
           console.log(response.data);
         })
         .catch(error => {
-          // Message.error("error：" + "请检查网络是否连接");
+          Message.error("error：" + "请检查网络是否连接");
         })
+    },
+    timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
+      if (this.formInline.sj) {
+        this.$store.dispatch('timeFormat', this.formInline);
+      } else {
+        this.$store.dispatch('getNewDate', this.formInline);
+        this.formInline.startTime = "";
+        this.formInline.endTime = "";
+      }
+      // }
+    },
+    moneyData(money) { //不能用过滤器，很难受 金额
+      return (money / 100).toFixed(2)
+    },
+    jsztData(txzt) { //不能用过滤器，很难受  结算状态
+      if (txzt == 1) {
+        return "微信";
+      } else if (txzt == 2) {
+        return "支付宝";
+      } else {
+        return "银行卡";
+      }
     },
   }
 }

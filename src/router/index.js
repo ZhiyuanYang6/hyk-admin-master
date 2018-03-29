@@ -99,6 +99,7 @@ export const constantRouterMap = [
 
   //登陆界面
   { path: '/login', component: _import('login/index'), hidden: true, },
+  { path: '/ceOne', component: _import('ceOne/index'), hidden: true, },
   //主页
   {
     path: '',

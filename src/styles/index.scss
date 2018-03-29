@@ -179,3 +179,8 @@ div.el-dialog__body {
 #app .el-submenu li.el-menu-item:hover {
   background-color: #202427 !important;
 }
+
+
+.el-dialog--center div.el-dialog__footer {
+  padding: 20px 0;
+}

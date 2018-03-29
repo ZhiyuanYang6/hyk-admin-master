@@ -12,10 +12,8 @@
         <el-input v-model="formInline.yhkh" style="width: 120px;" placeholder="银行卡号"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="formInline.txsj" filterable placeholder="请选择提现时间" style="width:150px;">
-          <el-option v-for="item in opttxsj" :key="item.value" :label="item.label" :value="item.value">
-          </el-option>
-        </el-select>
+        <el-date-picker v-model="formInline.sj" type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        </el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-select v-model="formInline.txzt" filterable placeholder="请选择提现状态" style="width:150px;">
@@ -33,17 +31,16 @@
     <div class="stable">
       <!-- @sort-change="sortChange" -->
       <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border>
-        <el-table-column prop="hybh" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
-        <el-table-column prop="hymc" label="会员名称" align="center"> </el-table-column>
-        <el-table-column prop="sjh" label="手机号" align="center"> </el-table-column>
-        <el-table-column prop="txje" label="提现金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="txly" label="提现来源" align="center"> </el-table-column>
+        <el-table-column prop="memberId" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
+        <el-table-column prop="name" label="会员名称" align="center"> </el-table-column>
+        <el-table-column prop="phone" label="手机号" align="center"> </el-table-column>
+        <el-table-column prop="je" label="提现金额(元)" align="center"> </el-table-column>
         <el-table-column prop="txzt" label="提现状态" align="center"> </el-table-column>
-        <el-table-column prop="yhkh" label="银行卡号" align="center"> </el-table-column>
-        <el-table-column prop="txdh" label="提现单号" align="center"> </el-table-column>
-        <el-table-column prop="yhlsh" label="银行流水号" align="center"> </el-table-column>
-        <el-table-column prop="txsj" label="提现时间" align="center"> </el-table-column>
-        <el-table-column prop="dzsj" label="到账时间" align="center"> </el-table-column>
+        <el-table-column prop="bankCard" label="银行卡号" align="center"> </el-table-column>
+        <el-table-column prop="ddh" label="提现单号" align="center"> </el-table-column>
+        <el-table-column prop="bankNo" label="银行流水号" align="center"> </el-table-column>
+        <el-table-column prop="createTime" label="提现时间" align="center"> </el-table-column>
+        <el-table-column prop="getTime" label="到账时间" align="center"> </el-table-column>
       </el-table>
     </div>
     <!-- 分页 -->
@@ -63,13 +60,11 @@ export default {
         hybh: '',
         sjh: '',
         yhkh: '',
-        txsj: '',
-        txzt: '',
+        sj: '',
+        txzt: '0',
       },
-      opttxsj: [
-        { value: '1', label: '提现时间' }
-      ],
       opttxzt: [
+        { value: '0', label: '提现状态' },
         { value: '1', label: '处理中' },
         { value: '2', label: '已到账' },
         { value: '3', label: '未到帐' }
@@ -80,65 +75,83 @@ export default {
         pageNum: 1, //查询的页码
         totalCount: 100,
       },
-      tableData: [{
-        hybh: "001",
-        hymc: "张三",
-        sjh: "15945687512",
-        txje: "50000",
-        txly: "活期账号",
-        txzt: '处理中',
-        yhkh: '6002333335554',
-        txdh: '系统产生单号',
-        yhlsh: '银行转账产生单号',
-        txsj: '2008-09-10 22:23:15',
-        dzsj: '2008-09-10 22:23:15'
-      }],
-      orderBy: [],
+      tableData: [],
+      orderBy: '',
       loading: false,
     }
 
   },
   created: function() {
-    // this.onloadtable1();
+    this.$store.dispatch('getNewDate', this.formInline);
+    this.onloadtable1();
   },
   methods: {
     handleSizeChange(val) {
       this.listQuery.pageSize = val; //修改每页数据量
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     handleCurrentChange(val) { //跳转第几页
       this.listQuery.pageNum = val;
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     sortChange(column) { //服务器端排序
       if (column.order == "ascending") {
-        this.orderBy1 = column.prop + " asc";
+        this.orderBy = column.prop + " asc";
       } else if (column.order == "descending") {
-        this.orderBy1 = column.prop + " desc";
+        this.orderBy = column.prop + " desc";
       }
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     onloadtable1() { //售货机查询
-      var queryShjData = {
-        orderBy: this.orderBy1,
+      this.timeFormat();
+      var txmxcxData = {
+        orderBy: this.orderBy,
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
-        xl: this.formInline.xl,
-        jqbh: this.formInline.jqbh,
-        shbh: this.formInline.shbh,
-        lx: this.formInline.lx
+        hybh: this.formInline.hybh,
+        sjh: this.formInline.sjh,
+        yhkh: this.formInline.yhkh,
+        startTime: this.formInline.startTime,
+        endTime: this.formInline.endTime,
+        txzt: this.formInline.txzt,
       }
-      console.log(queryShjData);
-      axios.post('http://192.168.1.112:8092/Shjgl/queryShj', queryShjData)
+      console.log(txmxcxData);
+      axios.post('http://192.168.1.127:8082/card/withdrawDetail/withdrawDetailQueryPageList.do', txmxcxData)
         .then(response => {
           this.loading = false;
-          this.tableData = response.data.data;
+          for (var i = 0; i < response.data.list.length; i++) {
+            response.data.list[i].je = this.moneyData(response.data.list[i].je);
+            response.data.list[i].txzt = this.jsztData(response.data.list[i].status);
+          }
+          this.tableData = response.data.list;
+          this.listQuery.totalCount = response.data.total;
           console.log(response.data);
         })
         .catch(error => {
-          // Message.error("error：" + "请检查网络是否连接");
+          Message.error("error：" + "请检查网络是否连接");
         })
     },
+    timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
+      if (this.formInline.sj) {
+        this.$store.dispatch('timeFormat', this.formInline);
+      } else {
+        this.$store.dispatch('getNewDate', this.formInline);
+        this.formInline.startTime = "";
+        this.formInline.endTime = "";
+      }
+    },
+    moneyData(money) { //不能用过滤器，很难受 金额
+      return (money / 100).toFixed(2)
+    },
+    jsztData(txzt) { //不能用过滤器，很难受  结算状态
+      if (txzt == 1) {
+        return "处理中";
+      } else if (txzt == 2) {
+        return "已到账";
+      } else {
+        return "未到帐";
+      }
+    }
   }
 }
 
