@@ -44,7 +44,7 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
+import request from '@/utils/request'
 import { Message } from 'element-ui'
 
 export default {
@@ -110,21 +110,17 @@ export default {
         startTime: this.formInline.startTime,
         endTime: this.formInline.endTime
       }
-      console.log(symxData);
-      axios.post('http://192.168.1.127:8082/card/incomeDetail/incomeDetailQueryPageList.do', symxData)
-        .then(response => {
-          for (var i = 0; i < response.data.list.length; i++) {
-            response.data.list[i].syje = this.moneyData(response.data.list[i].je);
-            response.data.list[i].jszt = this.jsztData(response.data.list[i].status);
-          }
-          this.loading = false;
-          this.listQuery.totalCount = response.data.total;
-          this.tableData = response.data.list;
-          console.log(response.data);
-        })
-        .catch(error => {
-          Message.error("error：" + "请检查网络是否连接");
-        })
+      request({ url: 'card/incomeDetail/incomeDetailQueryPageList.do', method: 'post', data: symxData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].syje = this.moneyData(response.list[i].syje);
+          response.list[i].jszt = this.jsztData(response.list[i].jszt);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
     },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {

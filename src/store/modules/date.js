@@ -1,3 +1,5 @@
+import axios from 'axios'
+import { Message } from 'element-ui'
 const date = {
   mutations: {
     DATEFORMATE: (state, date) => { //时间格式化yy-mm-dd hh:mm:ss
@@ -26,6 +28,23 @@ const date = {
       date.sj = [snewDate, nnewDate];
       // console.log(date);
     },
+    REQUEST: (state, date) => { //发起请求
+      console.log(date.data);
+      // console.log(this.$store);
+      axios.post(process.env.BASE_API + date.url, date.data, {
+          headers: {
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+            'token': date.token,
+          }
+        })
+        .then(response => {
+          date.response = response.data.data.data
+          console.log(date.response);
+        })
+        .catch(error => {
+          Message.error("error：" + "请检查网络是否连接");
+        })
+    },
   },
   actions: {
     timeFormat({ commit }, date) {
@@ -34,6 +53,9 @@ const date = {
     getNewDate({ commit }, date) { //当天时间
       commit('NEW_DATE', date);
     },
+    requestSubmit({ commit }, date) {
+      commit('REQUEST', date);
+    }
   }
 
 }

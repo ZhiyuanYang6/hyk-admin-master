@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Login from '@/views/login'
+
+import store from '@/store'
 const _import = require('./_import_' + process.env.NODE_ENV)
 
 Vue.use(Router)
@@ -18,9 +19,9 @@ export const constantRouterMap = [
     redirect: '/hyxxgl/hyzlgl',
     meta: { noCache: false, title: '会员信息管理', icon: 'icon-huiyuanguanli' },
     children: [
-      { path: 'hyzlgl', component: _import('hyxxgl/hyzlgl'), name: "hyzlgl", meta: { title: '会员资料管理', icon: 'icon-danweiguanli', noCache: true } },
-      { path: 'czmxcx', component: _import('hyxxgl/czmxcx'), name: "czmxcx", meta: { title: '充值明细查询', icon: 'icon-danweiguanli', noCache: true } },
-      { path: 'xfmxcx', component: _import('hyxxgl/xfmxcx'), name: "xfmxcx", meta: { title: '消费明细查询', icon: 'icon-danweiguanli', noCache: true } }, { path: 'txmxcx', component: _import('hyxxgl/txmxcx'), name: "txmxcx", meta: { title: '提现明细查询', icon: 'icon-danweiguanli', noCache: true } }, { path: 'symxcx', component: _import('hyxxgl/symxcx'), name: "symxcx", meta: { title: '收益明细查询', icon: 'icon-danweiguanli', noCache: true } },
+      { path: 'hyzlgl', component: _import('hyxxgl/hyzlgl'), name: "hyzlgl", meta: { title: '会员资料管理', icon: 'icon-danweiguanli', noCache: false } },
+      { path: 'czmxcx', component: _import('hyxxgl/czmxcx'), name: "czmxcx", meta: { title: '充值明细查询', icon: 'icon-danweiguanli', noCache: false } },
+      { path: 'xfmxcx', component: _import('hyxxgl/xfmxcx'), name: "xfmxcx", meta: { title: '消费明细查询', icon: 'icon-danweiguanli', noCache: false } }, { path: 'txmxcx', component: _import('hyxxgl/txmxcx'), name: "txmxcx", meta: { title: '提现明细查询', icon: 'icon-danweiguanli', noCache: true } }, { path: 'symxcx', component: _import('hyxxgl/symxcx'), name: "symxcx", meta: { title: '收益明细查询', icon: 'icon-danweiguanli', noCache: true } },
       { path: 'jfmxcx', component: _import('hyxxgl/jfmxcx'), name: 'jfmxcx', meta: { noCache: false, title: '积分明细查询', icon: 'icon-danweiguanli' } },
       { path: 'yhjmxcx', component: _import('hyxxgl/yhjmxcx'), name: 'yhjmxcx', meta: { noCache: false, title: '红包/优惠卷明细查询', icon: 'icon-danweiguanli' } },
 
@@ -65,13 +66,14 @@ export const constantRouterMap = [
   //系统管理
   {
     path: '/xtgl',
+    name: 'xtgl',
     component: Layout,
-    children: [{
-      path: 'index',
-      name: 'xtgl',
-      component: _import('xtgl/index'),
-      meta: { noCache: false, title: '系统管理', icon: 'icon-xitongguanli' }
-    }]
+    redirect: '/xtgl/index',
+    meta: { noCache: false, title: '系统管理', icon: 'icon-xitongguanli' },
+    children: [
+      { path: 'index', name: 'xtgl', component: _import('xtgl/index'), meta: { noCache: false, title: '系统管理', icon: 'icon-xitongguanli' } },
+      { path: 'sjzd', name: 'sjzd', component: _import('xtgl/sjzd'), meta: { noCache: false, title: '数据字典', icon: 'icon-xitongguanli' } },
+    ]
   },
   //统计分析
   {

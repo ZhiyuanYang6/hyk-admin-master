@@ -2,13 +2,13 @@
   <div class="smain">
     <el-form :inline="true" :model="formInline" size="small" class="demo-form-inline">
       <el-form-item>
-        <el-input v-model="formInline.mbmc" style="width: 140px;" placeholder="用户id"></el-input>
+        <el-input v-model="formInline.hybh" style="width: 140px;" placeholder="用户编号"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-input v-model="formInline.mbmc" style="width: 140px;" placeholder="渠道id"></el-input>
+        <el-input v-model="formInline.qdbh" style="width: 140px;" placeholder="渠道编号"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="formInline.jszt" filterable placeholder="消息类型" style="width:150px;">
+        <el-select v-model="formInline.xxlx" filterable placeholder="消息类型" style="width:150px;">
           <el-option v-for="item in optjszt" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
@@ -24,14 +24,14 @@
       </el-form-item>
     </el-form>
     <div class="stable">
-      <el-table :data="tableData1" v-loading="loading" @sort-change="sortChange" style="width:100%" border>
-        <el-table-column prop="mbmc" sortable='custom' label="用户id" align="center"> </el-table-column>
-        <el-table-column prop="mbmc" label="渠道id" align="center"> </el-table-column>
-        <el-table-column prop="mbmc" label="会员等级" align="center"> </el-table-column>
-        <el-table-column prop="mbmc" label="消息类型" align="center"> </el-table-column>
-        <el-table-column prop="mbmc" label="标题" align="center"> </el-table-column>
-        <el-table-column prop="mbmc" label="状态" align="center"> </el-table-column>
-        <el-table-column prop="cjsj" label="创建时间" align="center"> </el-table-column>
+      <el-table :data="tableData" v-loading="loading" @sort-change="sortChange" style="width:100%" border>
+        <el-table-column prop="userId" sortable='custom' label="用户编号" align="center"> </el-table-column>
+        <el-table-column prop="qdId" label="渠道编号" align="center"> </el-table-column>
+        <el-table-column prop="memberLevel" label="会员等级" align="center"> </el-table-column>
+        <el-table-column prop="type" label="消息类型" align="center"> </el-table-column>
+        <el-table-column prop="title" label="标题" align="center"> </el-table-column>
+        <el-table-column prop="state" label="状态" align="center"> </el-table-column>
+        <el-table-column prop="createtime" label="创建时间" align="center"> </el-table-column>
         <el-table-column prop="cz" label="操作" align="center">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="dialogtable1(scope.$index, scope.row)">详情</el-button>
@@ -50,16 +50,17 @@
   </div>
 </template>
 <script>
-import xxggXxfb from './components/xxggXxfb'
+import { Message } from 'element-ui'
+import request from '@/utils/request'
 
 export default {
-  components: {
-    xxggXxfb
-  },
+  name: 'xxggXxfb',
   data() {
     return {
       formInline: {
-        mbmc: ''
+        hybh: '',
+        qdbh: '',
+        xxlx: ''
       },
       optjszt: [
         { value: '0', label: '结算状态' },
@@ -72,19 +73,15 @@ export default {
         pageNum: 1, //查询的页码
         totalCount: 100, //总页数
       },
-      tableData1: [{
-        mbmc: '商学院正门',
-        cjsj: '2017-11-25',
-        cz: '保养',
-        bz: '打机油',
-      }],
+      tableData: [],
+      orderBy: '',
       loading: false,
       dialogTableVisible: false
     }
   },
   created: function() {
     this.$store.dispatch('getNewDate', this.formInline);
-    // this.onloadtable();
+    this.onloadtable();
   },
   methods: {
     addSubmit() { //添加模板界面
@@ -112,19 +109,24 @@ export default {
         orderBy: this.orderBy,
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
-        mbmc: this.formInline.mbmc,
+        hybh: this.formInline.hybh,
+        qdbh: this.formInline.qdbh,
+        xxlx: this.formInline.xxlx,
+        startTime: this.formInline.startTime,
+        endTime: this.formInline
+          .endTime,
       }
-      this.loading = false;
-      // console.log(queryShjData);
-      // axios.post('http://192.168.1.112:8092/Shjgl/queryShj', queryShjData)
-      // .then(response => {
-      // this.loading = false;
-      // this.tableData1 = response.data.data;
-      // console.log(response.data);
-      // })
-      // .catch(error => {
-      // Message.error("error：" + "请检查网络是否连接");
-      // })
+      request({ url: 'card/message/messageQueryPageList.do', method: 'post', data: queryShjData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].memberLevel = this.memberData(response.list[i].memberLevel);
+          response.list[i].state = this.messageStatus(response.list[i].state);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
     },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
@@ -133,6 +135,22 @@ export default {
         this.$store.dispatch('getNewDate', this.formInline);
         this.formInline.startTime = "";
         this.formInline.endTime = "";
+      }
+    },
+    memberData(memberLevel) { //不能用过滤器，很难受  结算状态
+      if (memberLevel == 1) {
+        return "普通";
+      } else if (memberLevel == 2) {
+        return "白金";
+      } else {
+        return "钻石";
+      }
+    },
+    messageStatus(state) { //不能用过滤器，很难受  结算状态
+      if (state == 1) {
+        return "有效";
+      } else {
+        return "失效";
       }
     },
     childchanged(childdata) { //接收子组件参数

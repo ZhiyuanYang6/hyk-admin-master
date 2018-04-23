@@ -34,19 +34,19 @@
     <div class="stable">
       <!-- @sort-change="sortChange" -->
       <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border>
-        <el-table-column prop="hybh" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
-        <el-table-column prop="hymc" label="会员名称" align="center"> </el-table-column>
-        <el-table-column prop="sjh" label="手机号" align="center"> </el-table-column>
-        <el-table-column prop="xfje" label="消费金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="xffs" label="消费方式" align="center"> </el-table-column>
-        <el-table-column prop="xfqd" label="消费渠道" align="center"> </el-table-column>
+        <el-table-column prop="memberId" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
+        <el-table-column prop="name" label="会员名称" align="center"> </el-table-column>
+        <el-table-column prop="phone" label="手机号" align="center"> </el-table-column>
+        <el-table-column prop="je" label="消费金额(元)" align="center"> </el-table-column>
+        <el-table-column prop="payType" label="消费方式" align="center"> </el-table-column>
+        <el-table-column prop="payQd" label="消费渠道" align="center"> </el-table-column>
         <el-table-column prop="ddh" label="订单号" align="center"> </el-table-column>
         <el-table-column label="优惠金额" align="center">
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="dialogtable(scope.$index, scope.row)">{{scope.row.yhje}}</el-button>
+            <el-button type="text" size="mini" @click="dialogtable(scope.$index, scope.row)">{{scope.row.yhJe}}</el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="xfsj" label="消费时间" align="center"> </el-table-column>
+        <el-table-column prop="createTime" label="消费时间" align="center"> </el-table-column>
       </el-table>
     </div>
     <!-- 分页 -->
@@ -62,7 +62,7 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
+import request from '@/utils/request'
 import { Message } from 'element-ui'
 
 export default {
@@ -132,18 +132,18 @@ export default {
         endTime: this.formInline.endTime,
         xfqd: this.formInline.xfqd,
       }
-      console.log(xfmxcxData);
-      // debugger;
-      axios.post('http://192.168.1.127:8082/card/consumeDetail/consumeDetailQueryPageList.do', xfmxcxData)
-        .then(response => {
-          this.loading = false;
-          this.tableData = response.data.list;
-          this.listQuery.totalCount = response.data.total;
-          console.log(response.data);
-        })
-        .catch(error => {
-          Message.error("error：" + "请检查网络是否连接");
-        })
+      request({ url: 'card/consumeDetail/consumeDetailQueryPageList.do', method: 'post', data: xfmxcxData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].je = this.moneyData(response.list[i].je);
+          response.list[i].yhJe = this.moneyData(response.list[i].yhJe);
+          response.list[i].payType = this.xffsData(response.list[i].payType);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
     },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
@@ -158,13 +158,13 @@ export default {
     moneyData(money) { //不能用过滤器，很难受 金额
       return (money / 100).toFixed(2)
     },
-    jsztData(txzt) { //不能用过滤器，很难受  结算状态
-      if (txzt == 1) {
-        return "处理中";
-      } else if (txzt == 2) {
-        return "已到账";
+    xffsData(xffs) { //不能用过滤器，很难受  结算状态
+      if (xffs == "1") {
+        return "微信";
+      } else if (xffs == "2") {
+        return "支付宝";
       } else {
-        return "未到帐";
+        return "余额";
       }
     },
     dialogtable(index, row) { this.dialogdelVisible = true; },

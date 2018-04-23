@@ -26,19 +26,19 @@
     <div class="stable">
       <!-- @sort-change="sortChange" -->
       <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border>
-        <el-table-column prop="lccpbh" sortable='custom' width="120" label="理财产品编号" align="center"> </el-table-column>
-        <el-table-column prop="lccpmc" label="理财产品名称" align="center"> </el-table-column>
-        <el-table-column prop="hydj" label="会员等级" align="center"> </el-table-column>
-        <el-table-column prop="llsc" label="利率时长(天)" align="center"> </el-table-column>
-        <el-table-column prop="ll" label="利率" align="center"> </el-table-column>
-        <el-table-column prop="jtje" label="起投金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="bzje" label="倍增金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="sxje" label="上限金额" align="center"> </el-table-column>
-        <el-table-column prop="tcfl" label="退出费率" align="center"> </el-table-column>
-        <el-table-column prop="tcmsjfqx" label="退出免手续费期限" align="center"> </el-table-column>
-        <el-table-column prop="yhzdktje" label="单日用户最多可退金额" align="center"> </el-table-column>
-        <el-table-column prop="cpzdktje" label="单日产品最多可退金额" align="center"> </el-table-column>
-        <el-table-column prop="bz" label="备注" align="center"> </el-table-column>
+        <el-table-column prop="id" sortable='custom' width="120" label="理财产品编号" align="center"> </el-table-column>
+        <el-table-column prop="productName" label="理财产品名称" align="center"> </el-table-column>
+        <el-table-column prop="memberLevel" label="会员等级" align="center"> </el-table-column>
+        <el-table-column prop="days" label="利率时长(天)" align="center"> </el-table-column>
+        <el-table-column prop="percentage" label="利率" align="center"> </el-table-column>
+        <el-table-column prop="startJe" label="起投金额(元)" align="center"> </el-table-column>
+        <el-table-column prop="addJe" label="倍增金额(元)" align="center"> </el-table-column>
+        <el-table-column prop="fdJe" label="上限金额" align="center"> </el-table-column>
+        <el-table-column prop="exitpercentage" label="退出费率" align="center"> </el-table-column>
+        <el-table-column prop="exitnpdays" label="退出免手续费期限" align="center"> </el-table-column>
+        <el-table-column prop="exitmax" label="单日用户最多可退金额" align="center"> </el-table-column>
+        <el-table-column prop="exitfd" label="单日产品最多可退金额" align="center"> </el-table-column>
+        <el-table-column prop="remark" label="备注" align="center"> </el-table-column>
       </el-table>
     </div>
     <!-- 分页 -->
@@ -53,8 +53,8 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import { Message } from 'element-ui'
+import request from '@/utils/request'
 
 export default {
   name: 'txmccx',
@@ -91,53 +91,56 @@ export default {
           lccpbh: "1002",
         }
       ],
-      orderBy: [],
+      orderBy: "",
       loading: false,
       dialogdelVisible: false,
     }
 
   },
   created: function() {
-    // this.onloadtable1();
+    this.onloadtable1();
   },
   methods: {
     handleSizeChange(val) {
       this.listQuery.pageSize = val; //修改每页数据量
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     handleCurrentChange(val) { //跳转第几页
       this.listQuery.pageNum = val;
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     sortChange(column) { //服务器端排序
       if (column.order == "ascending") {
-        this.orderBy1 = column.prop + " asc";
+        this.orderBy = column.prop + " asc";
       } else if (column.order == "descending") {
-        this.orderBy1 = column.prop + " desc";
+        this.orderBy = column.prop + " desc";
       }
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     onloadtable1() { //售货机查询
       var queryShjData = {
-        orderBy: this.orderBy1,
+        orderBy: this.orderBy,
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
-        xl: this.formInline.xl,
-        jqbh: this.formInline.jqbh,
-        shbh: this.formInline.shbh,
-        lx: this.formInline.lx
+        lccpbh: this.formInline.lccpbh,
+        hydj: this.formInline.hydj,
+        starll: this.formInline.starll,
+        endll: this.formInline.endll
       }
       console.log(queryShjData);
-      axios.post('http://192.168.1.112:8092/Shjgl/queryShj', queryShjData)
-        .then(response => {
-          this.loading = false;
-          this.tableData = response.data.data;
-          console.log(response.data);
-        })
-        .catch(error => {
-          // Message.error("error：" + "请检查网络是否连接");
-        })
+      request({ url: 'card/percentageSetting/queryMemberPercentageSettingPageList.do', method: 'post', data: queryShjData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        /*for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].je = this.zjjfData(response.list[i].je);
+          response.list[i].level = this.zjjfData(response.list[i].level);
+        }*/
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
     },
+
     dialogtable() {
       this.dialogdelVisible = true;
     }

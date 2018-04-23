@@ -5,12 +5,12 @@
         <h3 class="title">会员卡管理系统</h3>
       </div>
       <el-form-item prop="username">
-        <i class="svg-container svg-container_login iconfont icon-user"></i>
+        <i class="iconfont icon-user"></i>
         </span>
         <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" placeholder="username" />
       </el-form-item>
       <el-form-item prop="password">
-        <i class="svg-container svg-container_login iconfont icon-et-change-password"></i>
+        <i class="iconfont icon-et-change-password"></i>
         <el-input name="password" :type="pwdType" @keyup.enter.native="handleLogin" v-model="loginForm.password" autoComplete="on" placeholder="password"></el-input>
         <span class="show-pwd iconfont icon-eye-off" @click="showPwd"></span>
       </el-form-item>
@@ -21,7 +21,7 @@
       </el-form-item>
       <div class="tips">
         <span style="margin-right:20px;">默认账号: admin</span>
-        <span> 默认密码: admin</span>
+        <span> 默认密码: password</span>
       </div>
     </el-form>
   </div>
@@ -49,7 +49,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: 'admin'
+        password: '000000'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -71,10 +71,12 @@ export default {
       this.$refs.loginForm.validate(valid => { //表单验证成功则返回true
         if (valid) {
           this.loading = true;
-          console.log(this.loginForm)
-          this.loading = false
-          this.$router.push({ path: '/' })
-
+          this.$store.dispatch('LoginByUsername', this.loginForm).then(() => {
+            this.loading = false
+            this.$router.push({ path: '/' })
+          }).catch(() => {
+            this.loading = false
+          })
         } else {
           console.log('error submit!!')
           return false
@@ -88,13 +90,6 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
 $bg:#2d3a4b;
 $light_gray:#eee;
-
-
-
-
-
-
-
 
 
 
@@ -156,7 +151,7 @@ $light_gray:#eee;
       }
     }
   }
-  .svg-container {
+  .iconfont {
     padding: 6px 5px 6px 15px;
     color: $dark_gray;
     vertical-align: middle;

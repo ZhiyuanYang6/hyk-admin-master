@@ -99,7 +99,9 @@ export default {
       this.$message('click on item ' + command);
     },
     logout() {
-      this.$router.push({ path: '/login' })
+      this.$store.dispatch('LogOut').then(() => {
+        location.reload() // In order to re-instantiate the vue-router object to avoid bugs
+      })
     }
   },
   computed: {

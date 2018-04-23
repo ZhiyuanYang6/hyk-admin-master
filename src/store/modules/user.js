@@ -1,5 +1,6 @@
-import { GetUserInfo, login, logout } from '@/api/login'
+import { LoginByUsername, logout } from '@/api/login' //, GetUserInfo,  
 import { getSession, setSession, removeSession } from '@/utils/auth'
+import request from '@/utils/request'
 
 const user = {
   state: {
@@ -23,45 +24,29 @@ const user = {
       state.roles = roles
     }
   },
-
   actions: {
-    // 登录
-    Login({ commit, state }, userInfo) {
-      const username = userInfo.username.trim()
+    LoginByUsername({ commit, state }, userInfo) { // 登录、获取用户信息
       return new Promise((resolve, reject) => {
-        login(username, userInfo.password).then(response => {
-          const data = response.data;
+        request({ url: 'card/login.do', method: 'post', data: userInfo }).then(response => {
+          const data = response.data.obj;
           setSession(data.token);
           commit('SET_TOKEN', data.token);
-          resolve()
-        }).catch(error => {
-          reject(error)
-        })
-      })
-    },
-    // 获取用户信息
-
-
-    // 获取用户信息
-    GetUserInfo({ commit, state }) {
-      return new Promise((resolve, reject) => { //Promise对象可以理解为一次执行的异步操作，
-        GetUserInfo(state.token).then(response => {
-          const data = response.data
-          commit('SET_ROLES', data.roles)
-          commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
+          commit('SET_NAME', data.login_name)
+          // commit('SET_ROLES', data.roles)
+          // commit('SET_AVATAR', data.avatar)
           resolve(response)
         }).catch(error => {
           reject(error)
         })
       })
     },
+
     // 登出
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {
-        logout(state.token).then(() => {
+        logout(state.token).then((response) => {
           commit('SET_TOKEN', '')
-          commit('SET_ROLES', [])
+          // commit('SET_ROLES', [])
           removeSession()
           resolve()
         }).catch(error => {

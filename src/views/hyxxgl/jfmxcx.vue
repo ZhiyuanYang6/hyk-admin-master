@@ -53,7 +53,7 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
+import request from '@/utils/request'
 import { Message } from 'element-ui'
 
 export default {
@@ -151,32 +151,27 @@ export default {
         startTime: this.formInline.startTime,
         endTime: this.formInline.endTime
       }
-      console.log(jfmxcxData);
       this.loading = true;
-      axios.post('http://192.168.1.127:8082/card/pointsDetail/pointsDetailQueryPageList.do', jfmxcxData)
-        .then(response => {
-          this.loading = false;
-          this.analysis(response.data.list);
-          this.listQuery.totalCount = response.data.total;
-          this.tableData = response.data.list;
-          console.log(response.data);
-        })
-        .catch(error => {
-          this.loading = false;
-          Message.error("error：" + "请检查网络是否连接");
-        })
+      request({ url: 'card/pointsDetail/pointsDetailQueryPageList.do', method: 'post', data: jfmxcxData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].xffs = this.zjjfData(response.list[i].xffs);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
 
     },
     selecx() {
       this.onloadtable1();
     },
-    analysis(jfmxcxData) { //判断积分方式
-      for (var i = 0; i < jfmxcxData.length; i++) {
-        if (jfmxcxData[i].zjjf == "0" || jfmxcxData[i].zjjf == "" || jfmxcxData[i].zjjf == null || jfmxcxData[i].zjjf == undefined) {
-          jfmxcxData[i].jffs = "消费积分";
-        } else {
-          jfmxcxData[i].jffs = "增加积分";
-        }
+    zjjfData(xffs) { //不能用过滤器，很难受  结算状态
+      if (xffs == "0") {
+        return "消费积分";
+      } else {
+        return "增加积分";
       }
     },
   },

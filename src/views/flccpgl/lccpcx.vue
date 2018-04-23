@@ -3,7 +3,7 @@
     <!-- 左侧表单 -->
     <el-form :inline="true" :model="formInline" size="small" class="demo-form-inline">
       <el-form-item>
-        <el-input v-model="formInline.xm" style="width: 120px;" placeholder="姓名"></el-input>
+        <el-input v-model="formInline.name" style="width: 120px;" placeholder="姓名"></el-input>
       </el-form-item>
       <el-form-item>
         <el-input v-model="formInline.sjh" style="width: 120px;" placeholder="手机号"></el-input>
@@ -24,16 +24,16 @@
     <div class="stable">
       <!-- @sort-change="sortChange" -->
       <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border>
-        <el-table-column prop="hybh" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
-        <el-table-column prop="hydj" label="会员等级" align="center"> </el-table-column>
-        <el-table-column prop="sjh" label="姓名" align="center"> </el-table-column>
-        <el-table-column prop="txje" label="手机号" align="center"> </el-table-column>
-        <el-table-column prop="txly" label="理财产品编号" align="center"> </el-table-column>
-        <el-table-column prop="txzt" label="理财产品名称" align="center"> </el-table-column>
-        <el-table-column prop="yhkh" label="投资金额" align="center"> </el-table-column>
-        <el-table-column prop="txdh" label="计息开始时间" align="center"> </el-table-column>
-        <el-table-column prop="yhlsh" label="到期日期" align="center"> </el-table-column>
-        <el-table-column prop="txsj" label="预计收益" align="center"> </el-table-column>
+        <el-table-column prop="memberId" sortable='custom' width="120" label="会员编号" align="center"> </el-table-column>
+        <el-table-column prop="level" label="会员等级" align="center"> </el-table-column>
+        <el-table-column prop="name" label="姓名" align="center"> </el-table-column>
+        <el-table-column prop="phone" label="手机号" align="center"> </el-table-column>
+        <el-table-column prop="productId" label="理财产品编号" align="center"> </el-table-column>
+        <el-table-column prop="productName" label="理财产品名称" align="center"> </el-table-column>
+        <el-table-column prop="je" label="投资金额" align="center"> </el-table-column>
+        <el-table-column prop="startDay" label="计息开始时间" align="center"> </el-table-column>
+        <el-table-column prop="endDay" label="到期日期" align="center"> </el-table-column>
+        <el-table-column prop="yjsy" label="预计收益" align="center"> </el-table-column>
       </el-table>
     </div>
     <!-- 分页 -->
@@ -42,15 +42,14 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import { Message } from 'element-ui'
-
+import request from '@/utils/request'
 export default {
   name: 'txmccx',
   data() {
     return {
       formInline: {
-        xm: '',
+        name: '',
         sjh: '',
         hydj: '',
       },
@@ -74,51 +73,64 @@ export default {
           hydj: "麻子"
         }
       ],
-      orderBy: [],
+      orderBy: '',
       loading: false,
     }
 
   },
   created: function() {
-    // this.onloadtable1();
+    this.onloadtable1();
   },
   methods: {
     handleSizeChange(val) {
       this.listQuery.pageSize = val; //修改每页数据量
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     handleCurrentChange(val) { //跳转第几页
       this.listQuery.pageNum = val;
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     sortChange(column) { //服务器端排序
       if (column.order == "ascending") {
-        this.orderBy1 = column.prop + " asc";
+        this.orderBy = column.prop + " asc";
       } else if (column.order == "descending") {
-        this.orderBy1 = column.prop + " desc";
+        this.orderBy = column.prop + " desc";
       }
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     onloadtable1() { //售货机查询
       var queryShjData = {
-        orderBy: this.orderBy1,
+        orderBy: this.orderBy,
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
-        xl: this.formInline.xl,
-        jqbh: this.formInline.jqbh,
-        shbh: this.formInline.shbh,
-        lx: this.formInline.lx
+        name: this.formInline.name,
+        sjh: this.formInline.sjh,
+        hydj: this.formInline.hydj
       }
       console.log(queryShjData);
-      axios.post('http://192.168.1.112:8092/Shjgl/queryShj', queryShjData)
-        .then(response => {
-          this.loading = false;
-          this.tableData = response.data.data;
-          console.log(response.data);
-        })
-        .catch(error => {
-          // Message.error("error：" + "请检查网络是否连接");
-        })
+      request({ url: 'card/memberPercentage/queryMemberPercentageByMemberId.do', method: 'post', data: queryShjData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].je = this.moneyData(response.list[i].je);
+          response.list[i].level = this.memberLevel(response.list[i].level);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
+    },
+    moneyData(money) { //不能用过滤器，很难受 金额
+      return (money / 100).toFixed(2)
+    },
+    memberLevel(level) { //不能用过滤器，很难受  结算状态
+      if (level == 1) {
+        return "普通";
+      } else if (level == 2) {
+        return "白银";
+      } else {
+        return "白金";
+      }
     },
   }
 }

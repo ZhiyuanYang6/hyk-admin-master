@@ -3,7 +3,7 @@
     <!-- 左侧表单 -->
     <el-form :inline="true" :model="formInline" size="small" class="demo-form-inline">
       <el-form-item>
-        <el-input v-model="formInline.xm" style="width: 120px;" placeholder="姓名"></el-input>
+        <el-input v-model="formInline.name" style="width: 120px;" placeholder="姓名"></el-input>
       </el-form-item>
       <el-form-item>
         <el-input v-model="formInline.sjh" style="width: 120px;" placeholder="手机号"></el-input>
@@ -21,15 +21,13 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="formInline.zcsj" filterable placeholder="请选择时间类型" style="width:150px;">
-          <el-option v-for="item in optzcsj" :key="item.value" :label="item.label" :value="item.value">
-          </el-option>
-        </el-select>
+        <el-date-picker v-model="formInline.sj" type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        </el-date-picker>
       </el-form-item>
       <!-- 右侧按钮 -->
       <el-form-item>
         <el-button type="warning" @click="onloadtable1()">查询</el-button>
-        <el-button type="success" @click="dialogtable1()">导出Excel</el-button>
+        <el-button type="success">导出Excel</el-button>
       </el-form-item>
     </el-form>
     <!-- 表格 -->
@@ -41,185 +39,139 @@
             <el-button type="text" size="mini" @click="Ryglccp(scope.$index, scope.row)">查看</el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="hybh" sortable='custom' width="110" label="会员编号" align="center"> </el-table-column>
-        <el-table-column prop="hydj" label="会员等级" align="center"> </el-table-column>
-        <el-table-column prop="sfrz" label="是否认证" align="center">
+        <el-table-column prop="id" sortable='custom' width="110" label="会员编号" align="center"> </el-table-column>
+        <el-table-column prop="level" label="会员等级" align="center"> </el-table-column>
+        <el-table-column label="是否认证" align="center">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="dialogtable(scope.$index, scope.row,'sfrz')">{{scope.row.sfrz}}</el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="xm" label="姓名" align="center">
+        <el-table-column label="姓名" align="center">
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="dialogtable(scope.$index, scope.row,'xm')">{{scope.row.xm}}</el-button>
+            <el-button type="text" size="mini" @click="dialogtable(scope.$index, scope.row,'xm')">{{scope.row.name}}</el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="xb" label="性别" width="50" align="center"> </el-table-column>
-        <el-table-column prop="sfz" label="身份证" width="170" align="center"> </el-table-column>
-        <el-table-column prop="sjh" label="手机号" width="110" align="center"> </el-table-column>
-        <el-table-column prop="kfxm" label="客服姓名" align="center">
+        <el-table-column prop="sex" label="性别" width="50" align="center"> </el-table-column>
+        <el-table-column prop="idCard" label="身份证" width="170" align="center"> </el-table-column>
+        <el-table-column prop="phone" label="手机号" width="110" align="center"> </el-table-column>
+        <el-table-column label="客服姓名" align="center">
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="dialogtable(scope.$index, scope.row,'kfxm')">{{scope.row.kfxm}}</el-button>
+            <el-button type="text" size="mini" @click="dialogtable(scope.$index, scope.row,'kfxm')">{{scope.row.customName}}</el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="hqye" label="活期余额(元)" width="110" align="center"> </el-table-column>
-        <el-table-column prop="dqye" label="定期余额(元)" width="110" align="center"> </el-table-column>
-        <el-table-column prop="syjf" label="剩余积分" align="center"> </el-table-column>
-        <el-table-column prop="zcsj" label="注册时间" width="130" align="center"> </el-table-column>
+        <el-table-column prop="hqzje" label="活期余额(元)" width="110" align="center"> </el-table-column>
+        <el-table-column prop="dqzje" label="定期余额(元)" width="110" align="center"> </el-table-column>
+        <el-table-column prop="zjf" label="剩余积分" align="center"> </el-table-column>
+        <el-table-column prop="createTime" label="注册时间" width="130" align="center"> </el-table-column>
       </el-table>
     </div>
     <!-- 分页 -->
     <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.currentPage" :page-sizes="[10, 30, 50, 100]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.totalCount">
     </el-pagination>
-    <!--  会员认证对话框-->
-    <el-dialog title="会员认证" width="40%" :visible.sync="dialogdelVisible1">
-      <hyrz :hyzlrow="hyzlrow"></hyrz>
-      <!-- <hr> -->
-      <!--    <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogdelVisible1 = false">取 消</el-button>
-        <el-button type="primary" @click="dialogdelVisible1 = false">确 定</el-button>
-      </div> -->
-    </el-dialog>
-    <!--  会员详情信息对话框-->
-    <el-dialog title="会员详情信息" width="40%" :visible.sync="dialogdelVisible2">
-      <hyxqxx :hyzlrow="hyzlrow"></hyxqxx>
-      <!-- <hr> -->
-      <!--      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogdelVisible2= false">关 闭</el-button>
-      </div> -->
-    </el-dialog>
-    <!--  客服详情信息对话框-->
-    <el-dialog title="客服详情信息" :visible.sync="dialogdelVisible3" width="40%">
-      <kfxqxx :hyzlrow="hyzlrow"></kfxqxx>
-      <!-- <hr> -->
-      <!--       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogdelVisible3 = false">取 消</el-button>
-        <el-button type="primary" @click="dialogdelVisible3 = false">确 定</el-button>
-      </div> -->
-    </el-dialog>
   </div>
 </template>
 <script>
 // import { dcShjxx, queryMachinesStatus, queryShj } from '@/api/shj'
-import axios from 'axios'
-import kfxqxx from './components/kfxqxx'
-import hyxqxx from './components/hyxqxx'
-import hyrz from './components/hyrz'
+import request from '@/utils/request'
 import { Message } from 'element-ui'
 
 export default {
-  components: { kfxqxx, hyxqxx, hyrz },
-  name: 'wdshj',
+  name: 'hyzlgl',
   data() {
     return {
       formInline: {
-        xm: '',
+        name: '',
         sjh: '',
         hydj: '',
         sfrz: '',
-        zcsj: '',
+        sj: '',
       },
-      formInline3: {
-        jqlx: "",
-        jqbh: "",
-        pch: "",
-      },
-      opthydj: [
-        { value: '1', label: '钻石' },
-        { value: '2', label: '黄金' }
-      ],
       optsfrz: [
         { value: '1', label: '已认证' },
         { value: '2', label: '未认证' }
       ],
-      optzcsj: [
-        { value: '1', label: '注册时间' }
+      opthydj: [
+        { value: '1', label: '黄金' },
+        { value: '2', label: '钻石' }
       ],
-      dialogdelVisible1: false,
-      dialogdelVisible2: false,
-      dialogdelVisible3: false,
       listQuery: {
         pageSize: 10, //默认每页的数据量
         currentPage: 1, //当前页码
         pageNum: 1, //查询的页码
         totalCount: 100,
       },
-      tableData: [{
-        yglccp: '查看',
-        hybh: '001',
-        hydj: '钻石',
-        sfrz: '已认证',
-        xm: '张三',
-        xb: "男",
-        sfz: "430524198905642154",
-        sjh: "15945687512",
-        kfxm: "李四",
-        hqye: "1000",
-        dqye: "100000",
-        syjf: '7890',
-        zcsj: '2008-09-10'
-      }],
-      orderBy: [],
+      tableData: [],
+      orderBy: "",
       loading: false,
-      data2: {},
-      hyzlrow: {},
     }
-
   },
   created: function() {
-    // this.onloadtable1();
+    this.$store.dispatch('getNewDate', this.formInline);
+    this.onloadtable1();
   },
   methods: {
     handleSizeChange(val) {
       this.listQuery.pageSize = val; //修改每页数据量
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     handleCurrentChange(val) { //跳转第几页
       this.listQuery.pageNum = val;
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     sortChange(column) { //服务器端排序
       if (column.order == "ascending") {
-        this.orderBy1 = column.prop + " asc";
+        this.orderBy = column.prop + " asc";
       } else if (column.order == "descending") {
-        this.orderBy1 = column.prop + " desc";
+        this.orderBy = column.prop + " desc";
       }
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     onloadtable1() { //售货机查询
+      this.timeFormat();
       var queryShjData = {
-        orderBy: this.orderBy1,
+        orderBy: this.orderBy,
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
-        xl: this.formInline.xl,
-        jqbh: this.formInline.jqbh,
-        shbh: this.formInline.shbh,
-        lx: this.formInline.lx
+        name: this.formInline.name,
+        sjh: this.formInline.sjh,
+        hydj: this.formInline.hydj,
+        sfrz: this.formInline.sfrz,
+        startTime: this.formInline.startTime,
+        endTime: this.formInline.endTime,
       }
-      console.log(queryShjData);
-      axios.post('http://192.168.1.112:8092/Shjgl/queryShj', queryShjData)
-        .then(response => {
-          this.loading = false;
-          this.tableData = response.data.data;
-          console.log(response.data);
-        })
-        .catch(error => {
-          // Message.error("error：" + "请检查网络是否连接");
-        })
+      request({ url: 'card/member/memberQueryPageList.do', method: 'post', data: queryShjData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].sex = this.sexData(response.list[i].sex);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
+    },
+    sexData(sex) { //不能用过滤器，很难受 金额
+      if (sex == "1") {
+        return "男";
+      } else if (sex == "2") {
+        return "女";
+      } else {
+        return "保密";
+      }
+    },
+    timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
+      if (this.formInline.sj) {
+        this.$store.dispatch('timeFormat', this.formInline);
+      } else {
+        this.$store.dispatch('getNewDate', this.formInline);
+        this.formInline.startTime = "";
+        this.formInline.endTime = "";
+      }
+      // }
     },
     Ryglccp(index, row) {
       this.$router.push('/lccpgl/lccpcx');
     },
-    dialogtable(index, row, lx) {
-      this.hyzlrow = row;
-      console.log(this.hyzlrow);
-      if (lx === "sfrz") {
-        this.dialogdelVisible1 = true;
-      } else if (lx === "xm") {
-        this.dialogdelVisible2 = true;
-      } else {
-        this.dialogdelVisible3 = true;
-      }
-    }
   }
 }
 

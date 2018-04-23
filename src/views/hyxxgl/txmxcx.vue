@@ -35,7 +35,7 @@
         <el-table-column prop="name" label="会员名称" align="center"> </el-table-column>
         <el-table-column prop="phone" label="手机号" align="center"> </el-table-column>
         <el-table-column prop="je" label="提现金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="txzt" label="提现状态" align="center"> </el-table-column>
+        <el-table-column prop="status" label="提现状态" align="center"> </el-table-column>
         <el-table-column prop="bankCard" label="银行卡号" align="center"> </el-table-column>
         <el-table-column prop="ddh" label="提现单号" align="center"> </el-table-column>
         <el-table-column prop="bankNo" label="银行流水号" align="center"> </el-table-column>
@@ -49,8 +49,9 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
+import request from '@/utils/request'
 import { Message } from 'element-ui'
+import axios from 'axios'
 
 export default {
   name: 'txmccx',
@@ -115,21 +116,17 @@ export default {
         endTime: this.formInline.endTime,
         txzt: this.formInline.txzt,
       }
-      console.log(txmxcxData);
-      axios.post('http://192.168.1.127:8082/card/withdrawDetail/withdrawDetailQueryPageList.do', txmxcxData)
-        .then(response => {
-          this.loading = false;
-          for (var i = 0; i < response.data.list.length; i++) {
-            response.data.list[i].je = this.moneyData(response.data.list[i].je);
-            response.data.list[i].txzt = this.jsztData(response.data.list[i].status);
-          }
-          this.tableData = response.data.list;
-          this.listQuery.totalCount = response.data.total;
-          console.log(response.data);
-        })
-        .catch(error => {
-          Message.error("error：" + "请检查网络是否连接");
-        })
+      request({ url: 'card/withdrawDetail/withdrawDetailQueryPageList.do', method: 'post', data: txmxcxData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].je = this.moneyData(response.list[i].je);
+          response.list[i].status = this.jsztData(response.list[i].status);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
     },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
@@ -143,10 +140,10 @@ export default {
     moneyData(money) { //不能用过滤器，很难受 金额
       return (money / 100).toFixed(2)
     },
-    jsztData(txzt) { //不能用过滤器，很难受  结算状态
-      if (txzt == 1) {
+    txztData(txzt) { //不能用过滤器，很难受  结算状态
+      if (txzt == "0") {
         return "处理中";
-      } else if (txzt == 2) {
+      } else if (txzt == "1") {
         return "已到账";
       } else {
         return "未到帐";

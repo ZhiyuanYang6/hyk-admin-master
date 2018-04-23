@@ -46,11 +46,11 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import { Message } from 'element-ui'
+import request from '@/utils/request'
 
 export default {
-  name: 'wdshj',
+  name: 'czmxcx',
   data() {
     return {
       formInline: {
@@ -112,21 +112,17 @@ export default {
         startTime: this.formInline.startTime,
         endTime: this.formInline.endTime,
       }
-      console.log(czmxcxData);
-      axios.post('http://192.168.1.127:8082/card/rechargeDetail/rechargeDetailQueryPageList.do', czmxcxData)
-        .then(response => {
-          this.loading = false;
-          this.tableData = response.data.list;
-          for (var i = 0; i < response.data.list.length; i++) {
-            response.data.list[i].je = this.moneyData(response.data.list[i].je);
-            response.data.list[i].payType = this.jsztData(response.data.list[i].payType);
-          }
-          this.listQuery.totalCount = response.data.total;
-          console.log(response.data);
-        })
-        .catch(error => {
-          Message.error("error：" + "请检查网络是否连接");
-        })
+      request({ url: 'card/rechargeDetail/rechargeDetailQueryPageList.do', method: 'post', data: czmxcxData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].je = this.moneyData(response.list[i].je);
+          response.list[i].payType = this.jsztData(response.list[i].payType);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
     },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {

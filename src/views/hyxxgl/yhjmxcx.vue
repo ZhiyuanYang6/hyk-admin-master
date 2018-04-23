@@ -57,11 +57,11 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
+import request from '@/utils/request'
 import { Message } from 'element-ui'
 
 export default {
-  name: 'txmccx',
+  name: 'yhjmxcx',
   data() {
     return {
       formInline: {
@@ -128,22 +128,18 @@ export default {
         startTime: this.formInline.startTime,
         endTime: this.formInline.endTime,
       }
-      console.log(yhjmxData);
-      axios.post('http://192.168.1.127:8082/card/coupons/couponsQueryPageList.do', yhjmxData)
-        .then(response => {
-          this.loading = false;
-          for (var i = 0; i < response.data.list.length; i++) {
-            response.data.list[i].je = this.moneyData(response.data.list[i].je);
-            response.data.list[i].zt = this.jsztData(response.data.list[i].state);
-            response.data.list[i].lx = this.jslxData(response.data.list[i].type);
-          }
-          this.tableData = response.data.list;
-          this.listQuery.totalCount = response.data.total;
-          console.log(response.data);
-        })
-        .catch(error => {
-          Message.error("error：" + "请检查网络是否连接");
-        })
+      request({ url: 'card/coupons/couponsQueryPageList.do', method: 'post', data: yhjmxData }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].je = this.moneyData(response.list[i].je);
+          response.list[i].zt = this.jsztData(response.list[i].zt);
+          response.list[i].lx = this.jslxData(response.list[i].lx);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
     },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
