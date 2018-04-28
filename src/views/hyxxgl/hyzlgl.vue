@@ -21,7 +21,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-date-picker v-model="formInline.sj" type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        <el-date-picker v-model="formInline.sj" unlinkPanels type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
         </el-date-picker>
       </el-form-item>
       <!-- 右侧按钮 -->
@@ -68,6 +68,19 @@
     <!-- 分页 -->
     <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.currentPage" :page-sizes="[10, 30, 50, 100]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.totalCount">
     </el-pagination>
+    <!-- 理财产品 -->
+    <el-dialog title="已购理财产品" width="60%" center :visible.sync="dialoglccpVisible">
+      <div class="smain">
+        <el-table :data="tableDataPurchased" v-loading="loading1" style="width:100%" border>
+          <el-table-column prop="hqzje" label="活期余额(元)" align="center"> </el-table-column>
+          <el-table-column prop="dqzje" label="定期余额(元)" align="center"> </el-table-column>
+          <el-table-column prop="dqzje" label="定期余额(元)" align="center"> </el-table-column>
+          <el-table-column prop="dqzje" label="定期余额(元)" align="center"> </el-table-column>
+          <el-table-column prop="dqzje" label="定期余额(元)" align="center"> </el-table-column>
+          <el-table-column prop="dqzje" label="定期余额(元)" align="center"> </el-table-column>
+        </el-table>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -100,9 +113,12 @@ export default {
         pageNum: 1, //查询的页码
         totalCount: 100,
       },
-      tableData: [],
+      tableData: [{}],
+      tableDataPurchased: [{}, {}, {}, {}, {}, {}],
       orderBy: "",
       loading: false,
+      loading1: false,
+      dialoglccpVisible: false
     }
   },
   created: function() {
@@ -170,7 +186,8 @@ export default {
       // }
     },
     Ryglccp(index, row) {
-      this.$router.push('/lccpgl/lccpcx');
+      this.dialoglccpVisible = true;
+      // this.$router.push('/lccpgl/lccpcx');
     },
   }
 }

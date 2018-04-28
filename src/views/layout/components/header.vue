@@ -4,8 +4,8 @@
       <!--Logo area-->
       <el-col :xs="10" :sm="10" :md="{span:19,offset:1}">
         <div class="logo">
-          <span class="logo_prefix">会员卡</span>
-          <span class="logo_suffix">系统管理系统</span>
+          <span class="logo_prefix">酉缘</span>
+          <span class="logo_suffix">会员管理系统</span>
         </div>
       </el-col>
       <el-col style="  cursor: pointer" :xs="2" :sm="2" :md="1">

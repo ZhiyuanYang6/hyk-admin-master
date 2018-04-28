@@ -20,7 +20,7 @@
       <!-- 右侧按钮 -->
       <el-form-item>
         <el-button type="warning" @click="onloadtable()">查询</el-button>
-        <el-button type="warning" @click="addSubmit" style="padding:9px 25px;"> + </el-button>
+        <el-button type="warning" @click="addSubmit" style="padding:9px 25px;">添加</el-button>
       </el-form-item>
     </el-form>
     <div class="stable">
@@ -43,7 +43,7 @@
       </el-pagination>
     </div>
     <!-- el-dialog -->
-    <el-dialog title="发布消息" :visible.sync="dialogTableVisible" width="38%">
+    <el-dialog title="发布消息" :visible.sync="dialogTableVisible" width="80%">
       <!-- dialog1Changed子组件修改参数事件 -->
       <xxgg-xxfb :childdata="dialogTableVisible" @dialog1Changed="childchanged($event)"></xxgg-xxfb>
     </el-dialog>
@@ -63,9 +63,9 @@ export default {
         xxlx: ''
       },
       optjszt: [
-        { value: '0', label: '结算状态' },
-        { value: '1', label: '已结算' },
-        { value: '2', label: '未结算' }
+        { value: '0', label: '全部' },
+        { value: '1', label: '有效' },
+        { value: '2', label: '无效' }
       ],
       listQuery: {
         pageSize: 10, //默认每页的数据量

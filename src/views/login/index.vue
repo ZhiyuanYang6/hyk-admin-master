@@ -2,7 +2,7 @@
   <div class="login-container">
     <el-form class="login-form" autoComplete="on" :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left">
       <div class="title-container">
-        <h3 class="title">会员卡管理系统</h3>
+        <h3 class="title">酉缘会员管理系统</h3>
       </div>
       <el-form-item prop="username">
         <i class="iconfont icon-user"></i>
@@ -19,10 +19,11 @@
           登录
         </el-button>
       </el-form-item>
-      <div class="tips">
-        <span style="margin-right:20px;">默认账号: admin</span>
-        <span> 默认密码: password</span>
-      </div>
+      <!-- <div class="tips">
+  <span style="margin-right:20px;">默认账号: admin</span>
+  <span> 默认密码: password</span>
+</div>
+ -->
     </el-form>
   </div>
 </template>
@@ -90,6 +91,8 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
 $bg:#2d3a4b;
 $light_gray:#eee;
+
+
 
 
 

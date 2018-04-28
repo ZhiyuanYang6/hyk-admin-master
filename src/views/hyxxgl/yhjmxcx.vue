@@ -15,7 +15,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="formInline.lyqd" filterable placeholder="来源渠道" style="width:100px;">
+        <el-select v-model="formInline.lyqd" filterable placeholder="渠道方式" style="width:100px;">
           <el-option v-for="item in optlyqd" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
@@ -27,7 +27,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-date-picker v-model="formInline.sj" type="datetimerange" style="width: 330px;" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        <el-date-picker v-model="formInline.sj" unlink-panels='false' type="datetimerange" style="width: 330px;" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
         </el-date-picker>
       </el-form-item>
       <!-- 右侧按钮 -->
@@ -45,7 +45,7 @@
         <el-table-column prop="phone" label="手机号" align="center"> </el-table-column>
         <el-table-column prop="lx" label="类型" align="center"> </el-table-column>
         <el-table-column prop="je" label="金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="qdName" label="来源渠道" align="center"> </el-table-column>
+        <el-table-column prop="qdName" label="渠道" align="center"> </el-table-column>
         <el-table-column prop="zt" label="状态" align="center"> </el-table-column>
         <el-table-column prop="startTime" label="有效开始日期" align="center"> </el-table-column>
         <el-table-column prop="endTime" label="有效结束日期" align="center"> </el-table-column>
@@ -76,7 +76,7 @@ export default {
         { value: '1', label: '类型' }
       ],
       optlyqd: [
-        { value: '1', label: '来源渠道' },
+        { value: '1', label: '渠道方式' },
       ],
       optzt: [
         { value: '1', label: '状态' },

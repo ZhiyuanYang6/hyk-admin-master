@@ -21,7 +21,7 @@ service.interceptors.request.use(config => { // 在发送请求之前做些什�
 // respone拦截器
 service.interceptors.response.use( // 对响应数据做点什么
   response => {
-    console.log(response);
+    // console.log(response);
     if (typeof response.data.data == "string") {
       response.data = JSON.parse(response.data.data); //json格式化
     }
