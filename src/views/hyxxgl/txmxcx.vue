@@ -12,12 +12,12 @@
         <el-input v-model="formInline.yhkh" style="width: 120px;" placeholder="银行卡号"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-date-picker v-model="formInline.sj" unlink-panels='false' type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        <el-date-picker v-model="formInline.sj" unlink-panels type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-select v-model="formInline.txzt" filterable placeholder="请选择提现状态" style="width:150px;">
-          <el-option v-for="item in opttxzt" :key="item.value" :label="item.label" :value="item.value">
+          <el-option v-for="item in opttxzt" :key="item.value" :label="item.name" :value="item.code">
           </el-option>
         </el-select>
       </el-form-item>
@@ -64,12 +64,7 @@ export default {
         sj: '',
         txzt: '0',
       },
-      opttxzt: [
-        { value: '0', label: '提现状态' },
-        { value: '1', label: '处理中' },
-        { value: '2', label: '已到账' },
-        { value: '3', label: '未到帐' }
-      ],
+      opttxzt: [],
       listQuery: {
         pageSize: 10, //默认每页的数据量
         currentPage: 1, //当前页码
@@ -83,8 +78,9 @@ export default {
 
   },
   created: function() {
-    this.$store.dispatch('getNewDate', this.formInline);
+    // this.$store.dispatch('getNewDate', this.formInline);
     this.onloadtable1();
+    this.gettxzt();
   },
   methods: {
     handleSizeChange(val) {
@@ -128,11 +124,21 @@ export default {
         this.loading = false
       })
     },
+    gettxzt() {
+      request({ url: 'card/dic/getalldicbyparentcode.do', method: 'post', data: { parentCode: 6 } }).then((response) => {
+        this.loadbtn = false;
+        this.opttxzt = response.data.data;
+        console.log(this.optlx);
+        debugger;
+      }).catch((err) => {
+        this.loading = false
+      })
+    },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
         this.$store.dispatch('timeFormat', this.formInline);
       } else {
-        this.$store.dispatch('getNewDate', this.formInline);
+        // this.$store.dispatch('getNewDate', this.formInline);
         this.formInline.startTime = "";
         this.formInline.endTime = "";
       }

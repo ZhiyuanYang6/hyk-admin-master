@@ -16,7 +16,7 @@
           <sidebar-item :is-nest="true" class="nest-menu" v-if="child.children&&child.children.length>0" :routes="[child]" :key="child.path"></sidebar-item>
           <router-link v-else :to="item.path+'/'+child.path" :key="child.name">
             <el-menu-item :index="item.path+'/'+child.path">
-              <i v-if="item.children[0].meta&&item.children[0].meta.icon" :class="['iconfont','icon-huiyuan1']"></i>
+              <i v-if="item.children[0].meta&&item.children[0].meta.icon" :class="['iconfont',child.meta.icon]"></i>
               <span v-if="child.meta&&child.meta.title">{{child.meta.title}}</span>
             </el-menu-item>
           </router-link>
@@ -28,6 +28,11 @@
 <script>
 export default {
   name: 'SidebarItem',
+  data() {
+    return {
+      sidebardata: '',
+    }
+  },
   props: {
     routes: {
       type: Array
@@ -39,11 +44,12 @@ export default {
   },
   methods: {
 
-  }
+  },
+
 }
 
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .iconfont {
   vertical-align: middle;
   margin-right: 5px;

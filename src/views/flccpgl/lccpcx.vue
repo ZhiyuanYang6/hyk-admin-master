@@ -10,7 +10,7 @@
       </el-form-item>
       <el-form-item>
         <el-select v-model="formInline.hydj" filterable placeholder="会员等级" style="width:150px;">
-          <el-option v-for="item in opthydj" :key="item.value" :label="item.label" :value="item.value">
+          <el-option v-for="item in opthydj" :key="item.value" :label="item.name" :value="item.code">
           </el-option>
         </el-select>
       </el-form-item>
@@ -80,6 +80,7 @@ export default {
   },
   created: function() {
     this.onloadtable1();
+    this.getmemberlevel();
   },
   methods: {
     handleSizeChange(val) {
@@ -108,7 +109,7 @@ export default {
         hydj: this.formInline.hydj
       }
       console.log(queryShjData);
-      request({ url: 'card/memberPercentage/queryMemberPercentageByMemberId.do', method: 'post', data: queryShjData }).then((response) => {
+      request({ url: 'card/memberPercentage/queryMemberPercentage.do', method: 'post', data: queryShjData }).then((response) => {
         this.loading = false; //关闭遮罩load
         for (var i = 0; i < response.list.length; i++) { //格式化参数 
           response.list[i].je = this.moneyData(response.list[i].je);
@@ -123,13 +124,23 @@ export default {
     moneyData(money) { //不能用过滤器，很难受 金额
       return (money / 100).toFixed(2)
     },
+    getmemberlevel() {
+      request({ url: 'card/dic/getalldicbyparentcode.do', method: 'post', data: { parentCode: 2 } }).then((response) => {
+        this.loadbtn = false;
+        this.opthydj = response.data.data;
+      }).catch((err) => {
+        this.loading = false
+      })
+    },
     memberLevel(level) { //不能用过滤器，很难受  结算状态
       if (level == 1) {
         return "普通";
       } else if (level == 2) {
         return "白银";
-      } else {
+      } else if (level == 3) {
         return "白金";
+      } else {
+        return "钻石";
       }
     },
   }

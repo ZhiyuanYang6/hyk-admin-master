@@ -119,6 +119,7 @@ export default {
         // }
         this.tableData = response.list; //table赋值值
         this.listQuery.totalCount = response.total; //赋值总页数
+
       }).catch((err) => {
         this.loading = false
       })

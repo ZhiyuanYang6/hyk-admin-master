@@ -21,9 +21,20 @@ service.interceptors.request.use(config => { // 在发送请求之前做些什�
 // respone拦截器
 service.interceptors.response.use( // 对响应数据做点什么
   response => {
-    // console.log(response);
-    if (typeof response.data.data == "string") {
+    // console.log(response.data);
+    if (typeof response.data.data == "string" && response.data.code != "A000") {
       response.data = JSON.parse(response.data.data); //json格式化
+    }
+    if (response.data.code == "A000") {
+      MessageBox.confirm('你的验证已过期，可以取消继续留在该页面，或者重新登录', '确定登出', {
+        confirmButtonText: '重新登录',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        store.dispatch('FedLogOut').then(() => {
+          location.reload() // 为了重新实例化vue-router对象 避免bug
+        })
+      });
     }
     console.log(response.data)
     return response.data

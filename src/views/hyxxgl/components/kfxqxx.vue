@@ -1,24 +1,25 @@
 <template>
   <div class="zlmain">
+    <hr>
     <el-card class="box-card" :body-style="{padding:'0px 10px'}">
       <div class="del">
         <p>
           <span>姓&nbsp;&nbsp; 名&nbsp;&nbsp;：</span>
-          <span>{{kfzl.xm}}</span>
+          <span>{{hyzlrow.name}}</span>
         </p>
         <p>
           <span>邮&nbsp;&nbsp; 箱&nbsp;&nbsp;：</span>
-          <span>{{kfzl.yx}}</span>
+          <span>{{hyzlrow.email}}</span>
         </p>
       </div>
       <div class="del" style="padding-right: 20px;">
         <p>
           <span>联系电话：</span>
-          <span>{{kfzl.lxdh}}</span>
+          <span>{{hyzlrow.phone}}</span>
         </p>
         <p>
           <span>联系地址：</span>
-          <span>{{kfzl.lxdz}}</span>
+          <span>{{hyzlrow.address}}</span>
         </p>
       </div>
     </el-card>
@@ -26,19 +27,10 @@
 </template>
 <script type="text/javascript">
 export default {
-  props: {
-    hyzlrow: {
-      type: Object
-    },
-  },
+  props: ["hyzlrow"],
   data() {
     return {
-      kfzl: {
-        xm: "李四",
-        yx: "430123455@qq.com",
-        lxdh: "13811111122",
-        lxdz: "湖南省长沙市"
-      }
+      kfzl: {}
     }
   }
 }

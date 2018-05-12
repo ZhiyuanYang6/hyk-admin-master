@@ -1,4 +1,5 @@
 const getters = {
+  permission_routers: state => state.user.routers,
   sidebar: state => state.app.sidebar,
   token: state => state.user.token,
   avatar: state => state.user.avatar,

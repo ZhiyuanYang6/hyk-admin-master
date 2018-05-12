@@ -49,8 +49,7 @@ export default {
   @include clearfix;
   position: relative;
   height: 100%;
-  width: 100%;
-  background-color: #545C64;
+  width: 100%; // background-color: #545C64;
 }
 
 </style>

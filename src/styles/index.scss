@@ -28,6 +28,11 @@ div:focus {
   outline: none;
 }
 
+hr {
+  border: 0;
+  border-top: 1px solid #dcdfe6;
+}
+
 a:focus,
 a:active {
   outline: none;
@@ -132,6 +137,10 @@ a:hover {
 
 
 //组件自定义
+.qxsz .el-table__body tr td {
+  padding: 0;
+}
+
 div .el-badge__content {
   border: 0;
 }

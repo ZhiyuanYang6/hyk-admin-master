@@ -9,14 +9,16 @@ router.beforeEach((to, from, next) => { //全局前置守卫
   const token = getSession();
   if (getSession()) { //验证登陆权限通过，进入主界面
     if (to.path === '/login') {
-      next({ path: '/' })
+      next({ path: '/' });
     } else {
       // store.dispatch('FedLogOut').then(() => {
       // Message.error('验证失败,请重新登录')
       // next({ path: '/login' })
       // })
       // }
-      next()
+      // debugger;
+      if (to.path === '/' || to.path === "/dashboard") { next({ path: '/hyxxgl' }); }
+      next();
     }
   } else { //验证不通过
     if (whiteList.indexOf(to.path) !== -1) { //如果是登陆界面不重定向

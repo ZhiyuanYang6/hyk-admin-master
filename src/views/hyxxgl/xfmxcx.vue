@@ -15,12 +15,12 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-date-picker v-model="formInline.sj" unlink-panels='false' type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        <el-date-picker v-model="formInline.sj" unlink-panels type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-select v-model="formInline.xfqd" filterable placeholder="请选择消费渠道" style="width:150px;">
-          <el-option v-for="item in optxfqd" :key="item.value" :label="item.label" :value="item.value">
+          <el-option v-for="item in optxfqd" :key="item.value" :label="item.name" :value="item.code">
           </el-option>
         </el-select>
       </el-form-item>
@@ -99,8 +99,9 @@ export default {
 
   },
   created: function() {
-    this.$store.dispatch('getNewDate', this.formInline);
+    // this.$store.dispatch('getNewDate', this.formInline);
     this.onloadtable1();
+    this.getxffs();
   },
   methods: {
     handleSizeChange(val) {
@@ -145,11 +146,21 @@ export default {
         this.loading = false
       })
     },
+    getxffs() {
+      request({ url: 'card/dic/getalldicbyparentcode.do', method: 'post', data: { parentCode: 5 } }).then((response) => {
+        this.loadbtn = false;
+        this.optxfqd = response.data.data;
+        console.log(this.optlx);
+        debugger;
+      }).catch((err) => {
+        this.loading = false
+      })
+    },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
         this.$store.dispatch('timeFormat', this.formInline);
       } else {
-        this.$store.dispatch('getNewDate', this.formInline);
+        // this.$store.dispatch('getNewDate', this.formInline);
         this.formInline.startTime = "";
         this.formInline.endTime = "";
       }

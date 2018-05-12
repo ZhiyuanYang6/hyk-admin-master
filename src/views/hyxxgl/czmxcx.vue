@@ -13,12 +13,12 @@
       </el-form-item>
       <el-form-item>
         <el-select v-model="formInline.czfs" filterable placeholder="请选择充值方式" style="width:150px;">
-          <el-option v-for="item in optczfs" :key="item.value" :label="item.label" :value="item.value">
+          <el-option v-for="item in optczfs" :key="item.value" :label="item.name" :value="item.code">
           </el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-date-picker v-model="formInline.sj" unlink-panels='false' type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        <el-date-picker v-model="formInline.sj" unlink-panels type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
         </el-date-picker>
       </el-form-item>
       <!-- 右侧按钮 -->
@@ -79,8 +79,9 @@ export default {
 
   },
   created: function() {
-    this.$store.dispatch('getNewDate', this.formInline);
+    // this.$store.dispatch('getNewDate', this.formInline);
     this.onloadtable1();
+    this.getczfs();
   },
   methods: {
     handleSizeChange(val) {
@@ -124,11 +125,21 @@ export default {
         this.loading = false
       })
     },
+    getczfs() {
+      request({ url: 'card/dic/getalldicbyparentcode.do', method: 'post', data: { parentCode: 4 } }).then((response) => {
+        this.loadbtn = false;
+        this.optczfs = response.data.data;
+        console.log(this.optlx);
+        debugger;
+      }).catch((err) => {
+        this.loading = false
+      })
+    },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
         this.$store.dispatch('timeFormat', this.formInline);
       } else {
-        this.$store.dispatch('getNewDate', this.formInline);
+        // this.$store.dispatch('getNewDate', this.formInline);
         this.formInline.startTime = "";
         this.formInline.endTime = "";
       }

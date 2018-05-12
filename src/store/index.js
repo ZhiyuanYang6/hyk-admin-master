@@ -18,6 +18,7 @@ const store = new Vuex.Store({
   },
   getters
   // getters: {
+  // permission_routers: state => state.user.routers,
   //   sidebar: state => state.app.sidebar, //侧边栏是否隐藏
   //   language: state => state.app.language, //语言
   //   token: state => state.user.token, //登陆安全码

@@ -2,44 +2,29 @@
   <div class="lccpupform">
     <hr>
     <el-form ref="form" :rules="rules2" class="addsublime" :inline="true" :model="form">
-      <el-form-item label="产品名称" prop="dlmc">
-        <el-input v-model="form.productName"></el-input>
+      <el-form-item label="客服名称" prop="dlmc">
+        <el-input v-model="form.name"></el-input>
       </el-form-item>
-      <el-form-item label="会员等级" prop="dlmc">
-        <el-select v-model="form.memberLevel" placeholder="请选择" clearable>
+      <el-form-item label="性别" prop="dlmc">
+        <el-select v-model="form.sex" placeholder="请选择" clearable>
           <el-option v-for="item in listrow.options" :key="item.value" :label="item.name" :value="item.code">
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="利率时长(天)" prop="dlmc">
-        <el-input v-model="form.days"></el-input>
+      <el-form-item label="身份证" prop="dlmc">
+        <el-input v-model="form.idCard"></el-input>
       </el-form-item>
-      <el-form-item label="利率" prop="dlmc">
-        <el-input v-model="form.percentage"></el-input>
+      <el-form-item label="电话" prop="dlmc">
+        <el-input v-model="form.phone"></el-input>
       </el-form-item>
-      <el-form-item label="起投金额" prop="dlmc">
-        <el-input v-model="form.startJe"></el-input>
+      <el-form-item label="地址" prop="dlmc">
+        <el-input v-model="form.address"></el-input>
       </el-form-item>
-      <el-form-item label="倍增金额" prop="dlmc">
-        <el-input v-model="form.addJe"></el-input>
+      <el-form-item label="邮箱" prop="dlmc">
+        <el-input v-model="form.email"></el-input>
       </el-form-item>
-      <el-form-item label="封顶金额(单用户)" prop="dlmc">
-        <el-input v-model="form.fdJe"></el-input>
-      </el-form-item>
-      <el-form-item label="产品上线金额" prop="dlmc">
-        <el-input v-model="form.maxJe"></el-input>
-      </el-form-item>
-      <el-form-item label="退出费率" prop="dlmc">
-        <el-input v-model="form.exitpercentage"></el-input>
-      </el-form-item>
-      <el-form-item label="退出免手续费期限" prop="dlmc">
-        <el-input v-model="form.exitnpdays"></el-input>
-      </el-form-item>
-      <el-form-item label="单日用户最多可退金额" prop="dlmc">
-        <el-input v-model="form.exitmax"></el-input>
-      </el-form-item>
-      <el-form-item label="单日产品最多可退金额" prop="dlmc">
-        <el-input v-model="form.exitfd"></el-input>
+      <el-form-item label="备注" prop="dlmc">
+        <el-input v-model="form.remark"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button class="subbtn" type="warning" @click="lccpsetInfo('form')">{{listrow.btn}}</el-button>
@@ -69,18 +54,13 @@ export default {
     return {
       form: {
         id: '',
-        productName: '',
-        memberLevel: '',
-        days: '',
-        percentage: '',
-        startJe: '',
-        addJe: '',
-        fdJe: '',
-        maxJe: '',
-        exitpercentage: '',
-        exitnpdays: '',
-        exitmax: '',
-        exitfd: '',
+        name: '',
+        sex: '',
+        idCard: '',
+        phone: '',
+        address: '',
+        email: '',
+        remark: '',
       },
       rules2: {
         productName: [{ validator: validdlmc, trigger: 'blur' }],
@@ -104,41 +84,33 @@ export default {
           let url;
           var dataDl;
           if (this.listrow.btn == "修改") {
-            url = "card/percentageSetting/modifyPercentageSetting.do";
+            url = "card/customService/modifyCustomService.do";
             console.log(this.listrow);
             debugger;
             dataDl = {
               id: this.listrow.id,
-              productName: this.form.productName,
-              memberLevel: this.form.memberLevel,
-              days: this.form.days,
-              percentage: this.form.percentage,
-              startJe: this.form.startJe,
-              addJe: this.form.addJe,
-              fdJe: this.form.fdJe,
-              maxJe: this.form.maxJe,
-              exitpercentage: this.form.exitpercentage,
-              exitnpdays: this.form.exitnpdays,
-              exitmax: this.form.exitmax,
-              exitfd: this.form.exitfd,
+              name: this.form.name,
+              sex: this.form.sex,
+              idCard: this.form.idCard,
+              phone: this.form.phone,
+              address: this.form.address,
+              email: this.form.email,
+              remark: this.form.remark,
             };
           } else {
-            url = "card/percentageSetting/addPercentageSetting.do";
+            url = "card/customService/addCustomService.do";
             dataDl = {
-              productName: this.form.productName,
-              memberLevel: this.form.memberLevel,
-              days: this.form.days,
-              percentage: this.form.percentage,
-              startJe: this.form.startJe,
-              addJe: this.form.addJe,
-              fdJe: this.form.fdJe,
-              maxJe: this.form.maxJe,
-              exitpercentage: this.form.exitpercentage,
-              exitnpdays: this.form.exitnpdays,
-              exitmax: this.form.exitmax,
-              exitfd: this.form.exitfd,
+              name: this.form.name,
+              sex: this.form.sex,
+              idCard: this.form.idCard,
+              phone: this.form.phone,
+              address: this.form.address,
+              email: this.form.email,
+              remark: this.form.remark,
             };
           }
+
+          console.log(this.form);
           request({ url: url, method: 'post', data: dataDl }).then((response) => {
             if (response.data.code == "1") {
               this.$message({ type: 'success', message: response.data.msg });

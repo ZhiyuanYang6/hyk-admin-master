@@ -26,6 +26,7 @@ const date = {
       var d = nnewDate.getDate();
       var snewDate = new Date(y, m, d);
       date.sj = [snewDate, nnewDate];
+      // date.sj = ['', '']; //清空当天时间
       // console.log(date);
     },
     REQUEST: (state, date) => { //发起请求

@@ -18,7 +18,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-date-picker v-model="formInline.sj" unlink-panels='false' type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
+        <el-date-picker v-model="formInline.sj" type="datetimerange" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00']">
         </el-date-picker>
       </el-form-item>
       <!-- 右侧按钮 -->
@@ -87,7 +87,6 @@ export default {
     }
   },
   created: function() {
-    this.getNewDate();
     this.onloadtable1();
   },
   methods: {
@@ -107,14 +106,7 @@ export default {
       }
       this.onloadtable1();
     },
-    getNewDate() { //当天时间
-      var nnewDate = new Date();
-      var y = nnewDate.getFullYear();
-      var m = nnewDate.getMonth();
-      var d = nnewDate.getDate();
-      var snewDate = new Date(y, m, d);
-      this.formInline.sj = [snewDate, nnewDate];
-    },
+
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
         var sy = this.formInline.sj[0].getFullYear();
@@ -132,7 +124,6 @@ export default {
         this.formInline.startTime = sy + "-" + (sm + 1 < 10 ? '0' + (sm + 1) : sm + 1) + "-" + (sd < 10 ? '0' + sd : sd) + " " + (sh < 10 ? '0' + sh : sh) + ":" + (si < 10 ? '0' + si : si) + ":" + (ss < 10 ? '0' + ss : ss);
         this.formInline.endTime = ey + "-" + (em + 1 < 10 ? '0' + (em + 1) : em + 1) + "-" + (ed < 10 ? '0' + ed : ed) + " " + (eh < 10 ? '0' + eh : eh) + ":" + (ei < 10 ? '0' + ei : ei) + ":" + (es < 10 ? '0' + es : es);
       } else {
-        this.getNewDate();
         this.formInline.startTime = "";
         this.formInline.endTime = "";
       }

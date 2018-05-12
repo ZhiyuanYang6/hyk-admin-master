@@ -20,21 +20,22 @@
       <!-- 右侧按钮 -->
       <el-form-item>
         <el-button type="warning" @click="onloadtable()">查询</el-button>
-        <el-button type="warning" @click="addSubmit" style="padding:9px 25px;">添加</el-button>
+        <el-button type="warning" @click="addSubmit('','add')" style="padding:9px 25px;">添加</el-button>
       </el-form-item>
     </el-form>
     <div class="stable">
       <el-table :data="tableData" v-loading="loading" @sort-change="sortChange" style="width:100%" border>
         <el-table-column prop="userId" sortable='custom' label="用户编号" align="center"> </el-table-column>
         <el-table-column prop="qdId" label="渠道编号" align="center"> </el-table-column>
-        <el-table-column prop="memberLevel" label="会员等级" align="center"> </el-table-column>
-        <el-table-column prop="type" label="消息类型" align="center"> </el-table-column>
+        <el-table-column prop="memberLevelshow" label="会员等级" align="center"> </el-table-column>
+        <el-table-column prop="showtype" label="消息类型" align="center"> </el-table-column>
         <el-table-column prop="title" label="标题" align="center"> </el-table-column>
         <el-table-column prop="state" label="状态" align="center"> </el-table-column>
         <el-table-column prop="createtime" label="创建时间" align="center"> </el-table-column>
         <el-table-column prop="cz" label="操作" align="center">
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="dialogtable1(scope.$index, scope.row)">详情</el-button>
+            <el-button type="text" size="mini" @click="addSubmit(scope.row)">修改</el-button>
+            <el-button type="text" size="mini" @click="delrowfun(scope.$index, scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -43,18 +44,19 @@
       </el-pagination>
     </div>
     <!-- el-dialog -->
-    <el-dialog title="发布消息" :visible.sync="dialogTableVisible" width="80%">
-      <!-- dialog1Changed子组件修改参数事件 -->
-      <xxgg-xxfb :childdata="dialogTableVisible" @dialog1Changed="childchanged($event)"></xxgg-xxfb>
+    <el-dialog :title="row.title1" :visible.sync="dialogTableVisible" width="40%">
+      <xxgg-xxfb :listrow="row" :dialogTableVisible="dialogTableVisible" @dialog1Changed="childchanged($event)"></xxgg-xxfb>
     </el-dialog>
   </div>
 </template>
 <script>
 import { Message } from 'element-ui'
 import request from '@/utils/request'
+import xxggXxfb from './components/xxggXxfb'
 
 export default {
-  name: 'xxggXxfb',
+  components: { xxggXxfb },
+  name: 'xxfb',
   data() {
     return {
       formInline: {
@@ -76,16 +78,33 @@ export default {
       tableData: [],
       orderBy: '',
       loading: false,
-      dialogTableVisible: false
+      dialogTableVisible: false,
+      row: {},
     }
   },
   created: function() {
-    this.$store.dispatch('getNewDate', this.formInline);
+    // this.$store.dispatch('getNewDate', this.formInline);
     this.onloadtable();
   },
   methods: {
-    addSubmit() { //添加模板界面
-      this.dialogTableVisible = true;
+    addSubmit(row, val) {
+      if (val === 'add') {
+        this.dialogTableVisible = true;
+        this.row.btn = "发布";
+        this.row.title1 = "消息发布";
+      } else {
+        this.row = row;
+        this.row.btn = "修改";
+        this.row.title1 = "修改消息发布";
+        if (row.userId) {
+          request({ url: 'card/member/queryMemberById.do', method: 'post', data: { id: row.userId } }).then((response) => {
+            this.row.name = response.data.name;
+            this.dialogTableVisible = true;
+          }).catch((err) => {});
+        } else {
+          this.dialogTableVisible = true;
+        }
+      }
     },
     handleSizeChange(val) {
       this.listQuery.pageSize = val; //修改每页数据量
@@ -113,14 +132,14 @@ export default {
         qdbh: this.formInline.qdbh,
         xxlx: this.formInline.xxlx,
         startTime: this.formInline.startTime,
-        endTime: this.formInline
-          .endTime,
+        endTime: this.formInline.endTime,
       }
       request({ url: 'card/message/messageQueryPageList.do', method: 'post', data: queryShjData }).then((response) => {
         this.loading = false; //关闭遮罩load
         for (var i = 0; i < response.list.length; i++) { //格式化参数 
-          response.list[i].memberLevel = this.memberData(response.list[i].memberLevel);
+          response.list[i].memberLevelshow = this.memberData(response.list[i].memberLevel);
           response.list[i].state = this.messageStatus(response.list[i].state);
+          response.list[i].showtype = this.messageType(response.list[i].type);
         }
         this.tableData = response.list; //table赋值值
         this.listQuery.totalCount = response.total; //赋值总页数
@@ -128,23 +147,61 @@ export default {
         this.loading = false
       })
     },
+    delrowfun(index, row) { //删除
+      this.$confirm('此操作将删除 “ ' + row.title + ' “ ,  是否继续?', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        var queryShjData = {
+          id: row.id,
+        }
+        request({ url: 'card/message/updateMessageById.do', method: 'post', data: queryShjData }).then((response) => {
+          if (response.code == "1") {
+            this.$message({ type: 'success', message: response.msg });
+          } else {
+            this.$message({ type: 'error', message: response.msg });
+          }
+          this.onloadtable();
+        }).catch((err) => {
+          this.$message({ type: 'success', message: '删除成功' });
+          this.$message({ type: 'error', message: "请检查网络连接" });
+        });
+      }).catch(() => {
+        this.$message({ type: 'info', message: '已取消删除' });
+      });
+    },
     timeFormat() { //时间格式化yy-mm-dd hh:mm:ss
       if (this.formInline.sj) {
         this.$store.dispatch('timeFormat', this.formInline);
       } else {
-        this.$store.dispatch('getNewDate', this.formInline);
+        // this.$store.dispatch('getNewDate', this.formInline);
         this.formInline.startTime = "";
         this.formInline.endTime = "";
+      }
+    },
+    messageType(type) {
+      if (type == 1) {
+        return "私信";
+      } else {
+        return "公告";
       }
     },
     memberData(memberLevel) { //不能用过滤器，很难受  结算状态
       if (memberLevel == 1) {
         return "普通";
       } else if (memberLevel == 2) {
-        return "白金";
-      } else {
+        return "银卡";
+      } else if (memberLevel == 3) {
+        return "金卡";
+      } else if (memberLevel == 4) {
+        return "铂金";
+      } else if (memberLevel == 5) {
         return "钻石";
+      } else {
+        return "";
       }
+
     },
     messageStatus(state) { //不能用过滤器，很难受  结算状态
       if (state == 1) {
@@ -154,7 +211,8 @@ export default {
       }
     },
     childchanged(childdata) { //接收子组件参数
-      this.dialogTableVisible = childdata;
+      this.dialogTableVisible = false;
+      this.onloadtable();
     }
   }
 }

@@ -3,41 +3,31 @@
     <!-- 左侧表单 -->
     <el-form :inline="true" :model="formInline" size="small" class="demo-form-inline">
       <el-form-item>
-        <el-input v-model="formInline.lccpbh" style="width: 200px;" placeholder="理财产品编号/名称"></el-input>
+        <el-input v-model="formInline.kfrybh" style="width: 200px;" placeholder="客服人员编号"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="formInline.hydj" filterable placeholder="会员等级" style="width:200px;">
-          <el-option v-for="item in opthydj" :key="item.value" :label="item.name" :value="item.code">
-          </el-option>
-        </el-select>
+        <el-input v-model="formInline.kfrymc" style="width: 200px;" placeholder="客服人员名称"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-input v-model="formInline.starll" style="width: 100px;" placeholder="利率起"></el-input>
-        <span>-</span>
-        <el-input v-model="formInline.endll" style="width: 100px;" placeholder="利率止"></el-input>
+        <el-input v-model="formInline.sjh" style="width: 200px;" placeholder="电话"></el-input>
       </el-form-item>
       <!-- 右侧按钮 -->
       <el-form-item>
         <el-button type="warning" @click="onloadtable1()">查询</el-button>
-        <el-button type="success" :disabled="loadbtn" @click="Fproductset('','add')">新增产品</el-button>
+        <el-button type="success" :disabled="loadbtn" @click="Fproductset('','add')">新增客户人员</el-button>
       </el-form-item>
     </el-form>
     <!-- 表格 -->
     <div class="stable">
       <!-- @sort-change="sortChange" -->
       <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border>
-        <el-table-column prop="id" sortable='custom' width="130" label="理财产品编号" align="center"> </el-table-column>
-        <el-table-column prop="productName" label="理财产品名称" width="110" align="center"> </el-table-column>
-        <el-table-column prop="memberLevelshow" label="会员等级" align="center"> </el-table-column>
-        <el-table-column prop="days" label="利率时长(天)" align="center"> </el-table-column>
-        <el-table-column prop="percentage" label="利率" align="center"> </el-table-column>
-        <el-table-column prop="startJe" label="起投金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="addJe" label="倍增金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="fdJe" label="上限金额" align="center"> </el-table-column>
-        <el-table-column prop="exitpercentage" label="退出费率" align="center"> </el-table-column>
-        <el-table-column prop="exitnpdays" label="退出免手续费期限" align="center"> </el-table-column>
-        <el-table-column prop="exitmax" label="单日用户最多可退金额" width="110" align="center"> </el-table-column>
-        <el-table-column prop="exitfd" label="单日产品最多可退金额" width="110" align="center"> </el-table-column>
+        <el-table-column prop="id" sortable='custom' width="130" label="客户人员编号" align="center"> </el-table-column>
+        <el-table-column prop="name" label="姓名" width="110" align="center"> </el-table-column>
+        <el-table-column prop="showsex" label="性别" align="center"> </el-table-column>
+        <el-table-column prop="idCard" label="身份证" align="center"> </el-table-column>
+        <el-table-column prop="phone" label="电话" align="center"> </el-table-column>
+        <el-table-column prop="address" label="地址" align="center"> </el-table-column>
+        <el-table-column prop="email" label="邮箱" align="center"> </el-table-column>
         <el-table-column prop="remark" label="备注" align="center"> </el-table-column>
         <el-table-column label="操作" align="center" width="120" fixed="right">
           <template slot-scope="scope">
@@ -51,25 +41,24 @@
     <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.currentPage" :page-sizes="[10, 30, 50, 100]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.totalCount">
     </el-pagination>
     <el-dialog :title="row.title" width="60%" center :visible.sync="dialogdelVisible">
-      <lccpsetform :listrow="row" :dialogdlVisible="dialogdelVisible" @dialog1Changed="childchanged($event)"></lccpsetform>
+      <kfryglcsetform :listrow="row" :dialogdlVisible="dialogdelVisible" @dialog1Changed="childchanged($event)"></kfryglcsetform>
     </el-dialog>
   </div>
 </template>
 <script>
 import { Message } from 'element-ui'
 import request from '@/utils/request'
-import lccpsetform from './components/lccpsetform'
+import kfryglcsetform from './components/kfryglcsetform'
 
 export default {
-  name: 'txmccx',
-  components: { lccpsetform },
+  name: 'kfryglc',
+  components: { kfryglcsetform },
   data() {
     return {
       formInline: {
-        lccpbh: '',
-        hydj: '',
-        starll: '',
-        endll: '',
+        kfrybh: '',
+        kfrymc: '',
+        sjh: '',
       },
       opthydj: [
         { value: '1', label: '钻石' },
@@ -92,7 +81,6 @@ export default {
   },
   created: function() {
     this.onloadtable1();
-    this.getmemberlevel();
   },
   methods: {
     handleSizeChange(val) {
@@ -116,27 +104,18 @@ export default {
         orderBy: this.orderBy,
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
-        lccpbh: this.formInline.lccpbh,
-        hydj: this.formInline.hydj,
-        starll: this.formInline.starll,
-        endll: this.formInline.endll
+        kfrybh: this.formInline.kfrybh,
+        kfrymc: this.formInline.kfrymc,
+        sjh: this.formInline.sjh,
       }
       console.log(queryShjData);
-      request({ url: 'card/percentageSetting/queryMemberPercentageSettingPageList.do', method: 'post', data: queryShjData }).then((response) => {
+      request({ url: 'card/customService/customServiceQueryPageList.do', method: 'post', data: queryShjData }).then((response) => {
         this.loading = false; //关闭遮罩load
         for (var i = 0; i < response.list.length; i++) { //格式化参数 
-          response.list[i].memberLevelshow = this.sexData(response.list[i].memberLevel);
+          response.list[i].showsex = this.sexData(response.list[i].sex);
         }
         this.tableData = response.list; //table赋值值
         this.listQuery.totalCount = response.total; //赋值总页数
-      }).catch((err) => {
-        this.loading = false
-      })
-    },
-    getmemberlevel() {
-      request({ url: 'card/dic/getalldicbyparentcode.do', method: 'post', data: { parentCode: 2 } }).then((response) => {
-        this.loadbtn = false;
-        this.opthydj = response.data.data;
       }).catch((err) => {
         this.loading = false
       })
@@ -147,8 +126,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        request({ url: 'card/percentageSetting/deletePercentageSetting.do', method: 'post', data: { id: row.id } }).then((response) => {
-          debugger;
+        request({ url: 'card/customService/deleteCustomService.do', method: 'post', data: { id: row.id } }).then((response) => {
           if (response.data.code == "1") {
             this.$message({ type: 'success', message: response.data.msg });
           } else {
@@ -166,14 +144,14 @@ export default {
     Fproductset(row, val) {
       this.loadbtn = true;
       if (val == "add") {
-        this.row.title = "新增理财产品";
+        this.row.title = "添加客服人员";
         this.row.btn = "添加";
       } else {
         this.row = row;
-        this.row.title = "修改理财产品";
+        this.row.title = "修改客服人员";
         this.row.btn = "修改";
       }
-      request({ url: 'card/dic/getalldicbyparentcode.do', method: 'post', data: { parentCode: 2 } }).then((response) => {
+      request({ url: 'card/dic/getalldicbyparentcode.do', method: 'post', data: { parentCode: 1 } }).then((response) => {
         this.loadbtn = false;
         this.row.options = response.data.data;
         this.dialogdelVisible = true;
@@ -182,15 +160,13 @@ export default {
       })
 
     },
-    sexData(hydj) { //不能用过滤器，很难受 金额
-      if (hydj == "1") {
-        return "普通";
-      } else if (hydj == "2") {
-        return "黄金";
-      } else if (hydj == "3") {
-        return "白金";
+    sexData(sex) { //不能用过滤器，很难受 金额
+      if (sex == "1") {
+        return "男";
+      } else if (sex == "2") {
+        return "女";
       } else {
-        return "钻石";
+        return "其他";
       }
     },
     childchanged(childdata) { //接收值组件参数

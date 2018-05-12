@@ -13,7 +13,7 @@
       </el-form-item>
       <el-form-item>
         <el-select v-model="formInline.lx" filterable placeholder="类型" style="width:150px;">
-          <el-option v-for="item in optlx" :key="item.value" :label="item.label" :value="item.value">
+          <el-option v-for="item in optlx" :key="item.value" :label="item.name" :value="item.code">
           </el-option>
         </el-select>
       </el-form-item>
@@ -21,18 +21,25 @@
       <el-form-item>
         <el-button type="warning" @click="onloadtable1()">查询</el-button>
         <el-button type="success" @click="onloadtable1()">导出Excel</el-button>
+        <el-button type="success" @click="qproductset('','add')">新增渠道</el-button>
       </el-form-item>
     </el-form>
     <!-- 表格 -->
     <div class="stable">
       <!-- @sort-change="sortChange" -->
       <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border>
-        <el-table-column prop="qdbh" sortable='custom' width="120" label="渠道编号" align="center"> </el-table-column>
-        <el-table-column prop="qdmc" label="渠道名称" align="center"> </el-table-column>
-        <el-table-column prop="lxr" label="联系人" align="center"> </el-table-column>
-        <el-table-column prop="sjh" label="手机号" align="center"> </el-table-column>
-        <el-table-column prop="lx" label="类型" align="center"> </el-table-column>
-        <el-table-column prop="bz" label="备注" align="center"> </el-table-column>
+        <el-table-column prop="id" sortable='custom' width="120" label="渠道编号" align="center"> </el-table-column>
+        <el-table-column prop="qdName" label="渠道名称" align="center"> </el-table-column>
+        <el-table-column prop="linkMan" label="联系人" align="center"> </el-table-column>
+        <el-table-column prop="phone" label="手机号" align="center"> </el-table-column>
+        <el-table-column prop="type" label="类型" align="center"> </el-table-column>
+        <el-table-column prop="remark" label="备注" align="center"> </el-table-column>
+        <el-table-column label="操作" align="center" width="120" fixed="right">
+          <template slot-scope="scope">
+            <el-button @click="qproductset(scope.row)" type="text">修 改</el-button>
+            <el-button @click="deleteqd(scope.row,'xl')" type="text">删 除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
     <!-- 分页 -->
@@ -40,17 +47,21 @@
     </el-pagination>
     <div class="stable">
       <!-- @sort-change="sortChange" -->
-      <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border>
-      </el-table>
+      <el-table :data="tableData" @sort-change="sortChange" v-loading="loading" style="width:100%" border></el-table>
     </div>
+    <el-dialog :title="row.title" width="50%" center :visible.sync="dialogdelVisible">
+      <qdglsetform :listrow="row" :dialogdlVisible="dialogdelVisible" @dialog1Changed="childchanged($event)"></qdglsetform>
+    </el-dialog>
   </div>
 </template>
 <script>
-import axios from 'axios'
+import request from '@/utils/request'
+import qdglsetform from './components/qdglsetform'
 import { Message } from 'element-ui'
 const defaultabletitle = ["渠道编号", '渠道名称', "联系人", "手机号", "类型", "备注"];
 export default {
   name: 'txmccx',
+  components: { qdglsetform },
   data() {
     return {
       formInline: {
@@ -68,63 +79,121 @@ export default {
         pageNum: 1, //查询的页码
         totalCount: 100,
       },
-      tableData: [{
-          qdbh: "001",
-          qdmc: "酒店",
-          lxr: "张三",
-          sjh: "13877766666",
-          lx: "",
-          bz: "",
-        },
-        {
-          qdmc: "休闲农庄",
-        }
-      ],
-      orderBy: [],
+      tableData: [],
+      orderBy: "",
       loading: false,
+      dialogdelVisible: false,
+      row: {},
     }
 
   },
   created: function() {
-    // this.onloadtable1();
+    this.onloadtable1();
+    this.getqdtype();
   },
   methods: {
     handleSizeChange(val) {
       this.listQuery.pageSize = val; //修改每页数据量
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     handleCurrentChange(val) { //跳转第几页
       this.listQuery.pageNum = val;
-      // this.onloadtable1();
+      this.onloadtable1();
     },
     sortChange(column) { //服务器端排序
       if (column.order == "ascending") {
-        this.orderBy1 = column.prop + " asc";
+        this.orderBy = column.prop + " asc";
       } else if (column.order == "descending") {
-        this.orderBy1 = column.prop + " desc";
+        this.orderBy = column.prop + " desc";
       }
-      // this.onloadtable1();
+      this.onloadtable1();
+    },
+    qproductset(row, val) {
+      if (val == "add") {
+        this.row.title = "新增渠道";
+        this.row.btn = "添加";
+      } else {
+        this.row = row;
+        this.row.title = "修改渠道";
+        this.row.btn = "修改";
+      }
+      request({ url: 'card/dic/getalldicbyparentcode.do', method: 'post', data: { parentCode: 3 } }).then((response) => {
+        this.loadbtn = false;
+        this.row.options = response.data.data;
+        this.dialogdelVisible = true;
+      }).catch((err) => {
+        this.loading = false
+      })
+    },
+    deleteqd(row) { //删除
+      this.$confirm('此操作将删除 “ ' + row.qdName + ' “ ,  是否继续?', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        request({ url: 'card/qd/deleteqd.do', method: 'post', data: { id: row.id } }).then((response) => {
+          if (response.data.code == "1") {
+            this.$message({ type: 'success', message: response.data.msg });
+          } else {
+            this.$message({ type: 'error', message: response.data.msg });
+          }
+          this.onloadtable1();
+        }).catch((err) => {
+          this.$message({ type: 'success', message: '删除成功' });
+          this.$message({ type: 'error', message: "请检查网络连接" });
+        });
+      }).catch(() => {
+        this.$message({ type: 'info', message: '已取消删除' });
+      });
     },
     onloadtable1() { //售货机查询
       var queryShjData = {
-        orderBy: this.orderBy1,
+        orderBy: this.orderBy,
         pageNum: this.listQuery.pageNum,
         pageSize: this.listQuery.pageSize,
-        xl: this.formInline.xl,
-        jqbh: this.formInline.jqbh,
-        shbh: this.formInline.shbh,
+        qdbh: this.formInline.qdbh,
+        lxr: this.formInline.lxr,
+        sjh: this.formInline.sjh,
         lx: this.formInline.lx
       }
       console.log(queryShjData);
-      axios.post('http://192.168.1.112:8092/Shjgl/queryShj', queryShjData)
-        .then(response => {
-          this.loading = false;
-          this.tableData = response.data.data;
-          console.log(response.data);
-        })
-        .catch(error => {
-          // Message.error("error：" + "请检查网络是否连接");
-        })
+      request({
+        url: 'card/qd/qdQueryPageList.do',
+        method: 'post',
+        data: queryShjData
+      }).then((response) => {
+        this.loading = false; //关闭遮罩load
+        for (var i = 0; i < response.list.length; i++) { //格式化参数 
+          response.list[i].type = this.typeData(response.list[i].type);
+        }
+        this.tableData = response.list; //table赋值值
+        this.listQuery.totalCount = response.total; //赋值总页数
+      }).catch((err) => {
+        this.loading = false
+      })
+    },
+    getqdtype() {
+      request({ url: 'card/dic/getalldicbyparentcode.do', method: 'post', data: { parentCode: 3 } }).then((response) => {
+        this.loadbtn = false;
+        this.optlx = response.data.data;
+      }).catch((err) => {
+        this.loading = false
+      })
+    },
+    typeData(type) { //不能用过滤器，很难受 金额
+      if (type == "1") {
+        return "酒店";
+      } else if (type == "2") {
+        return "餐饮";
+      } else if (type == "3") {
+        return "KTV";
+      } else {
+        return "洗浴中心";
+      }
+    },
+    childchanged(childdata) { //接收值组件参数
+      this.dialogdelVisible = false;
+      this.onloadtable1();
     },
   }
 }
