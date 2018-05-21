@@ -203,7 +203,6 @@ export default {
         endTime: this.formInline.endTime,
       }
       request({ url: 'card/member/memberQueryPageList.do', method: 'post', data: queryShjData }).then((response) => {
-        debugger
         this.loading = false; //关闭遮罩load
         for (var i = 0; i < response.list.length; i++) { //格式化参数 
           response.list[i].sex = this.sexData(response.list[i].sex);

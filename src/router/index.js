@@ -126,6 +126,7 @@ export const constantRouterMap = [{
   {
     path: '/qdgl',
     component: Layout,
+    meta: { noCache: false, title: '渠道管理', icon: 'icon-xitongguanli' },
     children: [{
       path: 'index',
       name: 'qdgl',
@@ -133,6 +134,19 @@ export const constantRouterMap = [{
       meta: { noCache: false, title: '渠道管理', icon: 'icon-qudaoguanli' }
     }]
   },
+  //  会员提现审核
+  {
+    path: '/hytxsh',
+    component: Layout,
+    meta: { noCache: false, title: '会员提现审核', icon: 'icon-xitongguanli' },
+    children: [{
+      path: 'hytxsh',
+      name: 'hytxsh',
+      component: _import('hytxsh/hytxshc'),
+      meta: { noCache: false, title: '会员提现审核', icon: 'icon-qudaoguanli' }
+    }]
+  },
+
 
   //登陆界面
   { path: '/login', component: _import('login/index'), hidden: true, },

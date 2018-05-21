@@ -18,7 +18,15 @@ router.beforeEach((to, from, next) => { //全局前置守卫
       // }
       // debugger;
       if (to.path === '/' || to.path === "/dashboard") { next({ path: '/hyxxgl' }); }
-      next();
+      if (store.getters.roles.length === 0) { //是否有用户信息
+        store.dispatch('GetUserInfo').then(() => {
+          next();
+        }).catch(() => {
+          Message.error('验证失败,请重新登录');
+        });
+      } else {
+        next();
+      }
     }
   } else { //验证不通过
     if (whiteList.indexOf(to.path) !== -1) { //如果是登陆界面不重定向
@@ -27,4 +35,4 @@ router.beforeEach((to, from, next) => { //全局前置守卫
       next('/login');
     }
   }
-})
+});

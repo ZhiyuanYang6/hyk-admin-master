@@ -29,7 +29,7 @@
 </template>
 <script>
 import { isvalidUsername } from '@/utils/validate'
-
+import request from '@/utils/request'
 export default {
   name: 'login',
   data() {
@@ -73,8 +73,8 @@ export default {
         if (valid) {
           this.loading = true;
           this.$store.dispatch('LoginByUsername', this.loginForm).then(() => {
-            this.loading = false
-            this.$router.push({ path: '/' })
+            this.loading = false;
+            this.$router.push({ path: '/' });
           }).catch(() => {
             this.loading = false
           })
@@ -91,12 +91,6 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
 $bg:#2d3a4b;
 $light_gray:#eee;
-
-
-
-
-
-/* reset element-ui css */
 
 .login-container {
   .el-input {

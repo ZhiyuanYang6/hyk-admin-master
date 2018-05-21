@@ -47,29 +47,29 @@
         <el-table-column prop="bankNo" label="银行流水号" align="center"> </el-table-column>
         <el-table-column prop="createTime" label="提现时间" align="center"> </el-table-column>
         <el-table-column prop="getTime" label="到账时间" align="center"> </el-table-column>
-        <!--      <el-table-column label="操作" align="center" width="120" fixed="right">
+        <el-table-column label="操作" align="center" width="120" fixed="right">
           <template slot-scope="scope">
             <el-button :disabled="scope.row.status!==0" @click="Fproductset(scope.row)" type="text">审核</el-button>
           </template>
-        </el-table-column> -->
+        </el-table-column>
       </el-table>
     </div>
     <!-- 分页 -->
     <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.currentPage" :page-sizes="[10, 30, 50, 100]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="listQuery.totalCount">
     </el-pagination>
-    <!--   <el-dialog title="会员提现审核" width="40%" center :visible.sync="dialogdelVisible">
+    <el-dialog title="会员提现审核" width="40%" center :visible.sync="dialogdelVisible">
       <hytxsh :listrow="row" @dialog1Changed="childchanged($event)"></hytxsh>
-    </el-dialog> -->
+    </el-dialog>
   </div>
 </template>
 <script>
 import request from '@/utils/request'
 import { Message } from 'element-ui'
 import axios from 'axios'
-// import hytxsh from './components/hytxsh'
+import hytxsh from './components/hytxsh'
 export default {
   name: 'txmccx',
-  // components: { hytxsh },
+  components: { hytxsh },
   data() {
     return {
       formInline: {
@@ -127,15 +127,14 @@ export default {
         yhkh: this.formInline.yhkh,
         startTime: this.formInline.startTime,
         endTime: this.formInline.endTime,
-        txzt: this.formInline.txzt,
+        status: this.formInline.txzt,
       }
-      request({ url: 'card/withdrawDetail/withdrawDetailQueryPageList.do', method: 'post', data: txmxcxData }).then((response) => {
+      request({ url: 'card/withdrawDetail/withdrawDetailTempQueryPageList.do', method: 'post', data: txmxcxData }).then((response) => {
         this.loading = false; //关闭遮罩load
         this.tableData = response.list; //table赋值值
         this.listQuery.totalCount = response.total; //赋值总页数
         for (var i = 0; i < response.list.length; i++) { //格式化参数 
           response.list[i].je = this.moneyData(response.list[i].je);
-
         }
 
       }).catch((err) => {
@@ -165,11 +164,11 @@ export default {
     },
     txztData(txzt) { //不能用过滤器，很难受  结算状态
       if (txzt == "0") {
-        return "处理中";
+        return "未审核";
       } else if (txzt == "1") {
-        return "已到账";
+        return "审核通过";
       } else {
-        return "未到帐";
+        return "审核未通过";
       }
     },
     Fproductset(row, val) {

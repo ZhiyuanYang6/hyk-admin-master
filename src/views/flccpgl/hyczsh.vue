@@ -20,7 +20,7 @@
         <el-table-column prop="productName" label="产品名称" width="110" align="center"> </el-table-column>
         <el-table-column prop="name" label="会员名称" align="center"> </el-table-column>
         <el-table-column prop="je" label="充值金额(元)" align="center"> </el-table-column>
-        <el-table-column prop="yjsy" label="预计收益" align="center"> </el-table-column>
+        <el-table-column prop="yjsy" label="预计收益(元)" align="center"> </el-table-column>
         <el-table-column prop="state" label="审核状态" align="center"> </el-table-column>
         <el-table-column label="操作" align="center" width="120" fixed="right">
           <template slot-scope="scope">
@@ -101,6 +101,8 @@ export default {
         this.loading = false; //关闭遮罩load
         for (var i = 0; i < response.list.length; i++) { //格式化参数 
           response.list[i].state = this.showstates(response.list[i].state);
+          response.list[i].je = this.moneyData(response.list[i].je);
+          response.list[i].yjsy = this.moneyData(response.list[i].yjsy);
         }
         this.tableData = response.list; //table赋值值
         this.listQuery.totalCount = response.total; //赋值总页数
@@ -133,6 +135,9 @@ export default {
       this.row = row;
       this.dialogdelVisible = true;
 
+    },
+    moneyData(money) { //不能用过滤器，很难受 金额
+      return (money / 100).toFixed(2)
     },
     showstates(state) { //不能用过滤器，很难受 金额
       if (state == "0") {

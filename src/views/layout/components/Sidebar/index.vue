@@ -59,6 +59,10 @@ export default {
   }
 }
 
+.el-menu {
+  margin-bottom: 100px;
+}
+
 div.hide {
   overflow: hidden;
   padding-left: 10px;

@@ -141,6 +141,16 @@ a:hover {
   padding: 0;
 }
 
+.checkstyle .el-checkbox__label {
+  white-space: normal; // float: right;
+  vertical-align: middle;
+  width: 12em;
+}
+
+.checkstyle .el-checkbox__input {
+  padding-top: 5px;
+}
+
 div .el-badge__content {
   border: 0;
 }

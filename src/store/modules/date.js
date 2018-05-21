@@ -46,6 +46,35 @@ const date = {
           Message.error("error：" + "请检查网络是否连接");
         })
     },
+    GETTREE: (state, data) => { //格式化树结构
+      console.log(data);
+      let items = { id: '', name: "", pid: "", seq: "", url: '', children: [] };
+      let data1 = [];
+      let splx = [];
+      for (let i = 0; i < data.list.length; i++) {
+        var aa1 = splx.find((item) => {
+          return item === data.list[i].splx;
+        });
+        if (!aa1) {
+          splx.push(data.list[i].splx);
+          items = {
+            value: data.list[i].id,
+            label: data.list[i].splx,
+            children: [
+              { "value": data.list[i].id, "label": data.list[i].sppp, }
+            ]
+          }
+          data1.push(items)
+        } else {
+          for (let n = 0; n < data1.length; n++) {
+            // console.log(data1[n])
+            if (data1[n].label == data.list[i].splx)
+              data1[n].children.push({ value: data.list[i].id, label: data.list[i].sppp })
+          }
+        }
+      }
+      data.treedata = data1;
+    }
   },
   actions: {
     timeFormat({ commit }, date) {
@@ -56,7 +85,10 @@ const date = {
     },
     requestSubmit({ commit }, date) {
       commit('REQUEST', date);
-    }
+    },
+    getTrees({ commit }, date) { //格式化树结构
+      commit('GETTREE', date);
+    },
   }
 
 }
