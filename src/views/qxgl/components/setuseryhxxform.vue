@@ -18,6 +18,7 @@
   </div>
 </template>
 <script>
+import request from '@/utils/request'
 export default {
   props: ['listrow', "dialogVisible", 'options'],
   data() {
@@ -48,12 +49,20 @@ export default {
           //   this.form.aaa += item;
           // })
           // console.log(this.form.aaa);
-          // request({ url: url, method: 'post', data: dataDl }).then((response) => {
-          this.$message({ type: 'success', message: "添加成功" });
-          this.ADSubmit();
-          // }).catch((err) => {
-          //   this.$message({ type: 'error', message: "请检查网络连接" });
-          // });
+          var txmxcxData = {
+            id: this.listrow.id,
+            ssjs: this.form.ssjs,
+          }
+          request({ url: "card/user/modifyUserRoles.do", method: 'post', data: txmxcxData }).then((response) => {
+            if (response.data.code == '1') {
+              this.$message({ type: 'success', message: response.data.msg });
+            } else {
+              this.$message({ type: 'success', message: response.data.msg });
+            }
+            this.ADSubmit();
+          }).catch((err) => {
+            this.$message({ type: 'error', message: "请检查网络连接" });
+          });
         } else {
           this.$message({ message: '表单验证未通过', type: 'error' });
           return false;
@@ -65,16 +74,21 @@ export default {
     },
     initialize() { ////////////////////////进入初始化
       console.log(this.listrow);
-      // this.form.loginName = this.listrow.loginName;
+      this.form.loginName = this.listrow.loginName;
       // this.form.name = this.listrow.modifyName;
       // this.form.name = this.listrow.name;
       // this.form.name = this.listrow.name;
-      // request({ url: url, method: 'post', data: dataDl }).then((response) => {
-      // this.form.ssjs = response.data;
-      // }).catch((err) => {
-      // this.$message({ type: 'error', message: "请检查网络连接" });
-      // });
-      this.form = { loginName: this.listrow.loginName, ssjs: [1285655680, 1285655681] };
+      request({ url: "card/role/queryRolesByUserId.do", method: 'post', data: { id: this.listrow.id } }).then((
+        response) => {
+        debugger;
+        response.forEach(item => {
+          this.form.ssjs.push(item.id);
+        })
+        // this.form.ssjs = response.data;
+      }).catch((err) => {
+        this.$message({ type: 'error', message: "请检查网络连接" });
+      });
+      this.form = { loginName: this.listrow.loginName, ssjs: [] };
     },
   },
 }

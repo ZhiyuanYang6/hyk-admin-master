@@ -39,7 +39,7 @@
         <el-button style="float: right;margin-left: 10px;" type="primary" size="mini" @click="onloadcdmenu">保存</el-button>
         <el-button style="float: right;" type="primary" size="mini" @click="reset">重置</el-button>
       </div>
-      <el-tree ref="tree" :data="permission_routers" show-checkbox node-key="id" default-expand-all :default-checked-keys="cdMenu" :props="defaultProps">
+      <el-tree ref="tree" :data="permission_routers" show-checkbox node-key="id" @check="handleCheckChange" default-expand-all :default-checked-keys="cdMenu" :props="defaultProps">
       </el-tree>
     </el-card>
     <el-dialog :title=title :visible.sync="dialogVisible" width="30%">
@@ -115,6 +115,7 @@ export default {
       },
       cdMenu: [], //已选中菜单
       title: '',
+      listkeyid: '',
     };
   },
   computed: {
@@ -146,24 +147,32 @@ export default {
     },
     handleCheckedCitiesChange(value) {
       console.log(this.checkList);
-      // console.log(value);
+    },
+    handleCheckChange(data, checked) {
+      // debugger;
+      this.listkeyid = checked.checkedKeys + ',' + checked.halfCheckedKeys;
     },
     onloadcdmenu() {
-      // request({ url: 'mall/spxq/searchspxq.do', method: 'post', data: txmxcxData }).then(response => {
-      Message.success("授予菜单列表保存成功");
-      this.onloadtable3();
-      // }).catch(error => {
-      // Message.error("error：" + "请检查网络是否连接");
-      // });
+      var txmxcxData = {
+        roleId: this.currentRow.id,
+        checkresponMenu: this.listkeyid,
+      };
+      request({ url: 'card/roleResource/addRoleResourceMenu.do', method: 'post', data: txmxcxData }).then(response => {
+        if (response.data.code == "1") {
+          this.$message({ type: 'success', message: response.data.msg });
+          this.onloadtable3();
+        } else {
+          this.$message({ type: 'error', message: response.data.msg });
+        }
+      }).catch(error => {
+        Message.error("error：" + "请检查网络是否连接");
+      });
     },
     CapabilitiesClick() {
-      console.log(this.checkList);
       var checkrespon = []; //角色已有的功能编号
       this.checkList.forEach(item => {
         checkrespon.push(item.id);
       })
-      console.log(checkrespon);
-      console.log(this.currentRow);
       var txmxcxData = {
         roleId: this.currentRow.id,
         checkrespon: checkrespon,
@@ -188,11 +197,9 @@ export default {
         this.dialogVisible = true;
         return;
       }
-      console.log(this.formInline.url);
       this.$refs['formInline'].validate((valid) => {
         if (valid) {
           request({ url: this.formInline.url, method: 'post', data: this.formInline }).then(response => {
-            debugger;
             if (response.data.code == '1') {
               this.dialogVisible = false;
               this.$message({ type: 'success', message: response.data.msg });
@@ -200,8 +207,6 @@ export default {
             } else {
               this.$message({ type: 'error', message: response.data.msg });
             }
-
-
           }).catch(error => {
             Message.error("error：" + "请检查网络是否连接");
           });
@@ -239,7 +244,6 @@ export default {
       });
     },
     onloadtable1() { //查询
-      // var txmxcxData = {};
       request({ url: 'card/role/queryAllRoles.do', method: 'post', data: {} }).then(response => {
         this.loading = false;
         this.tableData = response;
@@ -252,7 +256,6 @@ export default {
         id: row ? row.id : '',
       };
       request({ url: 'card/resource/findResourceByRoleId.do', method: 'post', data: txmxcxData }).then(response => {
-        // console.log(response);
         if (row) {
           this.checkList = [];
           var checkrespon = []; //角色已有的功能编号
@@ -268,20 +271,7 @@ export default {
         } else {
           this.checkopt = response;
         }
-
-        // this.checkopt = [
-        //   { "id": 1610140929000, "name": "商户注册_注册", "description": null, "seq": 1, "status": 1, },
-        //   { "id": 1610140932001, "name": "商户查询_查询", "description": null, "seq": 2, "status": 1, },
-        //   { "id": 1610140933002, "name": "商户查询_编辑", "description": null, "seq": 3, "status": 1, },
-        //   { "id": 1610140933003, "name": "商户查询_删除", "description": null, "seq": 4, "status": 1, },
-
-        // ];
         this.isIndeterminate = true;
-
-
-
-
-        // this.listQuery.totalCount = response.total;
       }).catch(error => {
         Message.error("error：" + "请检查网络是否连接");
       });
@@ -290,13 +280,23 @@ export default {
       this.$refs.tree.setCheckedKeys(this.cdMenu);
     },
     onloadtable3(row) { //查询
-      // var txmxcxData = {};
-      // request({ url: 'mall/spxq/searchspxq.do', method: 'post', data: txmxcxData }).then(response => {
-      this.cdMenu = ['002', '004', '006']; //以选中菜单的id编号
-      // this.listQuery.totalCount = response.total;
-      // }).catch(error => {
-      // Message.error("error：" + "请检查网络是否连接");
-      // });
+      var txmxcxData = {
+        id: row ? row.id : '',
+      };
+      request({ url: 'card/resource/findMenuByRoleId.do', method: 'post', data: txmxcxData }).then(response => {
+        if (row) {
+          this.cdMenu = [];
+          this.listkeyid = [];
+          response.forEach(item => {
+            if (item.pid) { this.cdMenu.push(item.id); }
+            this.listkeyid.push(item.id);
+          });
+          this.listkeyid = this.listkeyid + '';
+          this.setCheckedKeys();
+        } else {}
+      }).catch(error => {
+        Message.error("error：" + "请检查网络是否连接");
+      });
     },
   }
 }

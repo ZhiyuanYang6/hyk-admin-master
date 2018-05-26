@@ -216,13 +216,24 @@ export default {
       }
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // request({ url: 'card/role/queryAllRoles.do', method: 'post', data: { id: row.userId } }).then((response) => {
-          this.dialogVisible[2].show = false;
-          this.$refs[formName].resetFields();
-          console.log(this.row);
-          // }).catch((err) => {
-          // this.$message({ type: 'error', message: "请检查网络连接" });
-          // });
+
+          var txmxcxData = {
+            id: this.row.id,
+            loginName: this.row.loginName,
+            password: this.form.paw,
+          }
+          request({ url: 'card/user/modifyUserPassword.do', method: 'post', data: txmxcxData }).then((response) => {
+            if (response.data.code == '1') {
+              this.$message({ type: 'success', message: response.data.msg });
+              this.dialogVisible[2].show = false;
+              this.$refs[formName].resetFields();
+            } else {
+              this.$message({ type: 'success', message: response.data.msg });
+            }
+            console.log(this.row);
+          }).catch((err) => {
+            this.$message({ type: 'error', message: "请检查网络连接" });
+          });
         } else {
           this.$message({ message: '表单验证未通过', type: 'error' });
           return false;
@@ -234,7 +245,7 @@ export default {
       if (row) {
         this.row = row;
       }
-      request({ url: 'card/role/queryAllRoles.do', method: 'post', data: { id: row.userId } }).then((response) => {
+      request({ url: 'card/role/queryAllRoles.do', method: 'post', data: {} }).then((response) => {
         this.options = response;
         this.dialogVisible[lx].show = true;
       }).catch((err) => {});
